@@ -1,0 +1,46 @@
+{
+  "name": "lifprojet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/server.js",
+  "scripts": {
+    "start": "nodemon ./dist/server.js",
+    "dev": "rm -rf dist && webpack --config webpack.server.config.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "browser-sync": "^2.26.7",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "mysql2": "^2.1.0",
+    "twig": "^1.13.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.8.3",
+    "@babel/preset-env": "^7.6.3",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.0.6",
+    "browser-sync-webpack-plugin": "^2.2.2",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^3.2.0",
+    "eslint": "^6.6.0",
+    "eslint-loader": "^3.0.2",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^4.0.0-beta.8",
+    "nodemon": "^1.19.4",
+    "raw-loader": "^3.1.0",
+    "style-loader": "^1.0.0",
+    "twig-html-loader": "^0.1.7",
+    "twig-loader": "^0.5.1",
+    "url-loader": "^2.2.0",
+    "webpack": "^4.41.2",
+    "webpack-assets-manifest": "^3.1.1",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-middleware": "^3.7.2",
+    "webpack-hot-middleware": "^2.25.0",
+    "webpack-manifest-plugin": "^2.2.0",
+    "webpack-node-externals": "^1.7.2",
+    "webpack-shell-plugin": "^0.5.0"
+  }
+}
