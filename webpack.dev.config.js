@@ -4,10 +4,13 @@ const webpack = require('webpack')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
+//const CopyPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   entry: {
-    main: ['./src/index.js', './src/scss/main.scss']
+    //leaflet : './node_modules/leaflet/dist/leaflet.css',
+    main: ['./src/app.ts', './src/scss/main.scss'],
+    polyfills: './src/polyfills.ts'
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -21,12 +24,21 @@ module.exports = {
   mode: 'development',
   target: 'web',
   //devtool: 'source-map',
+  resolve: {
+    // Add .ts and .tsx as a resolvable extension.
+    extensions: [".ts", ".tsx", ".js"]
+  },
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
         loader: "babel-loader",
+      },
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        loader: "ts-loader",
       },
       {
         // Loads the javacript into html template provided.
@@ -51,8 +63,13 @@ module.exports = {
         }
       },
       {
-        test: /\.(sa|sc|s)css$/,
-        use: [ 'style-loader', 'css-loader' ]
+        test: /\.(sa|sc|c)ss$/,
+        use: [
+          'style-loader',
+          'to-string-loader',
+          'css-loader',
+          'sass-loader'
+        ]
       },
       {
        test: /\.(png|svg|jpg|gif)$/,
@@ -80,8 +97,11 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: ['*', '!server.js*'],
-      verbose: true
+      verbose: true,
     }),
+    /*new CopyPlugin([
+      { from: './src/img', to: './' },
+    ]),*/
     new HtmlWebPackPlugin({
       hash: true,
       template: "./src/twig/index.twig",
@@ -96,6 +116,11 @@ module.exports = {
       proxy: 'localhost:8080',
       files: ['./dist/**/*'],
     }),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
+    /*new webpack.ContextReplacementPlugin(
+      /\@angular(\\|\/)core(\\|\/)fesm5/,
+      path.join(__dirname, './dist'),
+      {}
+    ),*/
   ]
 }

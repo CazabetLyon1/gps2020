@@ -9,11 +9,12 @@ const app = express()
 const jsonParser = bodyParser.json()
 
 app.use(express.static('dist'))
+app.use('/img', express.static('src/img'))
 
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/html')
   let file = fs.readdirSync(__dirname).find(file => file.match(new RegExp('index.(.*?).html')))
-  res.sendFile(file, {root: __dirname})
+  file ? res.sendFile(file, {root: __dirname}) : res.send("error")
 })
 
 app.listen(PORT, () => {

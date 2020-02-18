@@ -2,4 +2,25 @@
 
 {% block page %}
 <h1>Accueil</h1>
+<leaflet-map></leaflet-map>
+<div id="map_tools">
+  <input type="radio" id="move_map" name="tools" checked>
+  <label class="tool" for="move_map"></label>
+  <input type="radio" id="add" name="tools">
+  <label class="tool" for="add"></label>
+  <input type="radio" id="delete" name="tools">
+  <label class="tool" for="delete"></label>
+  <input type="radio" id="move" name="tools">
+  <label class="tool" for="move"></label>
+  <input type="radio" id="lasso" name="tools">
+  <label class="tool" for="lasso"></label>
+</div>
+<div id="top-left">
+  <img src="/img/map.png" alt="Logo Lifprojet">
+  <span>L<span>ifprojet</span></span>
+</div>
+<div id="bottom-left">
+  <button type="button" name="import" id="import">Importer</button>
+  <button type="button" name="export" id="export">Exporter</button>
+</div>
 {% endblock %}
