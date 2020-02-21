@@ -5,7 +5,7 @@
   "main": "./dist/server.js",
   "scripts": {
     "start": "nodemon ./dist/server.js",
-    "dev": "rm -rf dist && webpack --config webpack.server.config.js"
+    "dev": "webpack --config webpack.server.config.js"
   },
   "dependencies": {
     "@angular/animations": "^9.0.1",
@@ -26,8 +26,10 @@
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "leaflet": "^1.6.0",
+    "leaflet.tilelayer.pouchdbcached": "^1.0.0",
     "mapbox-gl": "^1.7.0",
     "mysql2": "^2.1.0",
+    "pouchdb": "^7.2.1",
     "rxjs": "^6.5.4",
     "twig": "^1.13.3",
     "zone.js": "^0.10.2"

@@ -1,6 +1,15 @@
 import { Component, OnInit } from '@angular/core'
+import PouchDB from 'pouchdb'
 import * as L from 'leaflet'
+import 'leaflet.tilelayer.pouchdbcached'
 //import * as M from 'mapbox-gl'
+
+declare global {
+  interface Window {
+    PouchDB: any
+  }
+}
+window.PouchDB = PouchDB
 
 @Component({
   selector: "leaflet-map",
@@ -34,25 +43,39 @@ export class MapComponent implements OnInit {
     })
     //let theme = "mapbox/streets-v10"
     let theme = "amauryg/ck6ru04ol65091ipfzqurfraf"
+    let token = "pk.eyJ1IjoiYW1hdXJ5ZyIsImEiOiJjazZxd3l5cHYwMTdnM21sOXM3Z3MxeWx3In0.VfaiCkcJq4e-UWo5ysP34Q"
     let osm = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    let mapbox = `https://api.mapbox.com/styles/v1/${theme}/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYW1hdXJ5ZyIsImEiOiJjazZxd3l5cHYwMTdnM21sOXM3Z3MxeWx3In0.VfaiCkcJq4e-UWo5ysP34Q`
+    let mapbox = `https://api.mapbox.com/styles/v1/${theme}/tiles/256/{z}/{x}/{y}?access_token=${token}`
     const tiles = L.tileLayer(mapbox, {
+      useCache: true,
+      crossOrigin: true,
       maxZoom: 19,
       detectRetina: true,
-      //attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      attribution: '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     })
     tiles.addTo(this.map)
 
-    /*L.control.zoom({
-      position: 'bottomright'
-    }).addTo(this.map)*/
+    tiles.on('tilecachehit', (e) => {
+      //console.log(e.url)
+    })
 
-    var polyline = L.polyline(arr, {color: 'red'}).addTo(this.map)
+    tiles.on('tilecachemiss', (e) => {
+      //console.log(e.url)
+    })
+
+    L.control.zoom({
+      position: 'bottomright'
+    }).addTo(this.map)
+
+    var polyline = L.polyline(arr, {color: '#3379FF'}).addTo(this.map)
 
     this.map.on('click', (e) => {
       console.log(e)
       arr.push([e.latlng.lat, e.latlng.lng])
-      L.polyline(arr, {color: 'red'}).addTo(this.map)
+      L.polyline(arr, {color: '#3379FF'}).addTo(this.map)
+      arr.forEach(coord => {
+        L.circle(coord, {radius: 7, fillColor: '#34616C', fillOpacity:1, stroke: false}).addTo(this.map)
+      })
     })
 
   }
