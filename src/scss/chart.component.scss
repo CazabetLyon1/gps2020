@@ -1,0 +1,22 @@
+@import '~apexcharts/dist/apexcharts.css';
+
+apex-chart {
+  position: absolute;
+  //bottom: -5px;
+  top: 100px;
+  right: 40px;
+  //left: 50%;
+  //top: 50%;
+  width: 200px;
+  height: 100px;
+  z-index: 10000;
+  background-color: rgba(255,255,255,0.6);
+  border-radius: 5px;
+  //transform: translate(-50%, -50%);
+  //background-color: rgba(255,255,255,1);
+}
+
+apex-chart svg {
+  padding: 10px;
+  margin: -5px -10px 0px -10px;
+}

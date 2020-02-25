@@ -4,6 +4,7 @@ const webpack = require('webpack')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
+const FilterWarningsPlugin = require('webpack-filter-warnings-plugin')
 //const CopyPlugin = require('copy-webpack-plugin')
 
 module.exports = {
@@ -97,7 +98,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: ['*', '!server.js*'],
-      verbose: true,
+      verbose: false,
     }),
     /*new CopyPlugin([
       { from: './src/img', to: './' },
@@ -117,6 +118,9 @@ module.exports = {
       files: ['./dist/**/*'],
     }),
     new webpack.NoEmitOnErrorsPlugin(),
+    new FilterWarningsPlugin({
+      exclude: [/System.import/, /Critical dependency/]
+    })
     /*new webpack.ContextReplacementPlugin(
       /\@angular(\\|\/)core(\\|\/)fesm5/,
       path.join(__dirname, './dist'),

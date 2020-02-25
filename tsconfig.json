@@ -5,7 +5,11 @@
         "lib": ["es2015", "dom"],
         "moduleResolution": "node",
         "types": ["node", "webpack", "core-js", "rx"],
-        "typeRoots": ["node_modules/@types", "src/@custom_types"],
+        "typeRoots": [
+          "node_modules/@types",
+          "node_modules/apexcharts/types",
+          "src/@custom_types",
+        ],
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "sourceMap": true,

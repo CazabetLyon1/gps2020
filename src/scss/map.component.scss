@@ -1,5 +1,17 @@
 //@import '~leaflet/dist/leaflet.css';
 
+/*.leaflet-container.move-cursor-enabled {
+  cursor: wait;
+}
+
+.leaflet-mouse-marker {
+  cursor: wait;
+}*/
+
+.leaflet-interactive {
+  //cursor: url(/img/move.png) 10 10, pointer !important;
+}
+
 .map-container {
   position: absolute;
   top: 0;

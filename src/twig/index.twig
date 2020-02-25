@@ -3,6 +3,7 @@
 {% block page %}
 <h1>Accueil</h1>
 <leaflet-map></leaflet-map>
+<apex-chart></apex-chart>
 <div id="map_tools">
   <input type="radio" id="move_map" name="tools" checked>
   <label class="tool" for="move_map"></label>
@@ -19,8 +20,11 @@
   <img src="/img/map.png" alt="Logo Lifprojet">
   <span>L<span>ifprojet</span></span>
 </div>
+<div id="coordinates">
+  <span id="lat">45,549569596</span><span id="lng">4,459596969</span>
+</div>
 <div id="bottom-left">
-  <button type="button" name="import" id="import">Importer</button>
-  <button type="button" name="export" id="export">Exporter</button>
+  <button type="button" name="import" id="import"></button>
+  <button type="button" name="export" id="export"></button>
 </div>
 {% endblock %}
