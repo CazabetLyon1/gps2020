@@ -48,6 +48,12 @@ export class MapComponent implements OnInit {
       .findIndex(x => (x as HTMLInputElement).checked)
   }
 
+  private activateTool = (idx): void => {
+    var i = Array.from(document.querySelectorAll("input[name='tools']"))[idx] as HTMLInputElement
+    i.checked = true
+    i.dispatchEvent(new Event('change'))
+  }
+
   private distance = (lat1, lng1, lat2, lng2): any => {
   	if (lat1 == lat2 && lng1 == lng2) return 0
   	let radlat1 = Math.PI * lat1/180
@@ -140,8 +146,13 @@ export class MapComponent implements OnInit {
     if (this.toolID() === 0) {
       document.getElementById("lat").textContent = e.latlng.lat
       document.getElementById("lng").textContent = e.latlng.lng
+      this.map.dragging.enable()
     }
-    if(this.drag) {
+    if([1,2,3,4].includes(this.toolID())) {
+      this.map.dragging.disable()
+    }
+    if(this.drag && (this.toolID() === 1 || this.toolID() === 3)) {
+      this.activateTool(3)
       let c = this.coordinates.slice(0)
       c.splice(this.num, 1)
       let near = c.find(coord => {
@@ -150,7 +161,6 @@ export class MapComponent implements OnInit {
       /*c.forEach(coord => {
         console.log(this.distance(e.latlng.lat, e.latlng.lng, coord[0], coord[1]))
       })*/
-      this.map.dragging.disable()
       this.coordinates[this.num] = near || [e.latlng.lat, e.latlng.lng]
       this.draw()
     }
@@ -200,6 +210,11 @@ export class MapComponent implements OnInit {
         e.target.setStyle({
           radius: 200,
         })
+      })
+      .on('click', (e) => {
+        if (this.toolID() === 2) {
+          this.delete(e)
+        }
       }))
       //this.circles[this.circles.length-1].setZIndex(this.circles.length)
       //this.circles[this.circles.length-1].bringToFront()
@@ -221,6 +236,12 @@ export class MapComponent implements OnInit {
 
   private addToIndex = (e, idx): void => {
     this.coordinates.splice(idx, 0, [e.latlng.lat, e.latlng.lng])
+    this.draw()
+  }
+
+  private delete = (e): void => {
+    let idx = this.circles.findIndex(x => x === e.target)
+    this.coordinates.splice(idx, 1)
     this.draw()
   }
 
@@ -299,6 +320,7 @@ export class MapComponent implements OnInit {
     this.map.on('mouseup', () => {
       this.drag = false
       this.num = null
+      if(this.toolID() === 3) this.activateTool(1)
     })
 
     /*let arr = []
