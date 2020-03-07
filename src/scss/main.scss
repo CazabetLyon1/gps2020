@@ -40,14 +40,43 @@ body, html {
 }
 
 #coordinates span {
+  position: relative;
   background: rgba(255,255,255,0.75);
   border: 1px solid rgba(203,204,205,1);
   padding: 8px;
+  padding-left: 58px;
   border-radius: 5px;
   font-family: 'Courier';
   font-size: 14px;
   margin-bottom: 10px;
   min-width: 160px;
+  height: 20px;
+  overflow: hidden;
+  line-height: 20px;
+}
+
+#coordinates span::before {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 100%;
+  background: rgba(240,240,240,1);
+  border-right: 1px solid rgba(203,204,205,1);
+  font-family: 'Helvetica';
+  font-size: 14px;
+  color: rgba(150,150,150,1);
+  line-height: 35px;
+  text-indent: 10px;
+}
+
+#coordinates span#lat::before {
+  content: 'LAT';
+}
+
+#coordinates span#lng::before {
+  content: 'LNG';
 }
 
 #bottom-left {

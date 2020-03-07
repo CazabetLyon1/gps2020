@@ -25,22 +25,23 @@ export class ChartElevationComponent {
   public chartOptions: Partial<ApexOptions>
 
   constructor() {
-    setTimeout(() => {
+    /*setTimeout(() => {
       this.chartOptions.chart.height = 200
       this.chartOptions.series = [
         {
           data: [19, 2, 14, 5, 20, 15, 3]
         }
       ]
-    }, 4000);
+    }, 4000);*/
     this.chartOptions = {
       series: [
         {
           name: "Altitude",
-          data: [10, 14, 3, 21, 19, 2, 9, 23, 14]
+          data: [0, 0]
         }
       ],
       chart: {
+        id: "elevation-chart",
         height: 100,
           type: "area",
         zoom: {

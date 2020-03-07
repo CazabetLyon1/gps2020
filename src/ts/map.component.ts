@@ -27,6 +27,7 @@ export class MapComponent implements OnInit {
   private map
   private token: string = "pk.eyJ1IjoiYW1hdXJ5ZyIsImEiOiJjazZxd3l5cHYwMTdnM21sOXM3Z3MxeWx3In0.VfaiCkcJq4e-UWo5ysP34Q"
   private coordinates: any = []
+  private elevations: any = []
   private polyline
   private circles: any = []
   private bool: boolean = true
@@ -84,11 +85,13 @@ export class MapComponent implements OnInit {
     if(this.polyline) this.map.removeLayer(this.polyline)
     this.polyline = L.polyline(this.coordinates, {weight: 3, color: '#3379FF'}).addTo(this.map)
     this.polyline.on('mousedown', (e) => {
-      this.bool = false
-      let i = e.target.getLatLngs().findIndex((x,i,t) => L.GeometryUtil.belongsSegment(e.latlng, t[i], t[i+1]))
-      this.addToIndex(e, i+1)
-      this.drag = true
-      this.num = i+1
+      if(this.toolID() === 1) {
+        this.bool = false
+        let i = e.target.getLatLngs().findIndex((x,i,t) => L.GeometryUtil.belongsSegment(e.latlng, t[i], t[i+1]))
+        this.addToIndex(e, i+1)
+        this.drag = true
+        this.num = i+1
+      }
     })
     this.coordinates.forEach(coord => {
       this.addMarker({
@@ -162,24 +165,38 @@ export class MapComponent implements OnInit {
         console.log(this.distance(e.latlng.lat, e.latlng.lng, coord[0], coord[1]))
       })*/
       this.coordinates[this.num] = near || [e.latlng.lat, e.latlng.lng]
+      this.getElevation(e).then(ele => {
+        this.elevations[this.num] = ele
+        //this.updateChart()
+      })
       this.draw()
     }
   }
 
+  private updateChart = (): void => {
+    window.ApexCharts.exec("elevation-chart", "updateSeries", [
+      {
+        data: this.elevations
+      }
+    ])
+  }
+
   private getElevation = (e): any => {
-    let xhr = new XMLHttpRequest()
-    let url = `https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/tilequery/${e.latlng.lat},${e.latlng.lng}.json?layers=contour&limit=50&access_token=${this.token}`
-    xhr.open("GET", url, true)
-    xhr.responseType = "json"
-    xhr.onload = (data) => {
-      console.log('data:')
-      console.log(data)
-    }
-    xhr.send()
+    return new Promise((resolve, reject) => {
+      let xhr = new XMLHttpRequest()
+      let url = `https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/tilequery/${e.latlng.lng},${e.latlng.lat}.json?layers=contour&limit=50&access_token=${this.token}`
+      xhr.open("GET", url, true)
+      xhr.responseType = "json"
+      xhr.onload = (data) => {
+        resolve(Math.max(...(data as any).target.response.features.map(x => x.properties.ele)))
+        //this.elevations.push(ele)
+        //this.updateChart()
+      }
+      xhr.send()
+    })
   }
 
   private addMarker = (e): void => {
-    //this.getElevation(e)
     //this.circles.push(L.circle(Array.isArray(e) ? (e as L.LatLngExpression) : [e.latlng.lat, e.latlng.lng],
     this.circles.push(L.circle([e.latlng.lat, e.latlng.lng],
       {
@@ -236,12 +253,18 @@ export class MapComponent implements OnInit {
 
   private addToIndex = (e, idx): void => {
     this.coordinates.splice(idx, 0, [e.latlng.lat, e.latlng.lng])
+    this.getElevation(e).then(ele => {
+      this.elevations.splice(idx, 0, ele)
+      this.updateChart()
+    })
     this.draw()
   }
 
   private delete = (e): void => {
     let idx = this.circles.findIndex(x => x === e.target)
     this.coordinates.splice(idx, 1)
+    this.elevations.splice(idx, 1)
+    this.updateChart()
     this.draw()
   }
 
@@ -249,6 +272,10 @@ export class MapComponent implements OnInit {
     if (this.toolID() === 1 && this.bool) {
       this.coordinates.push([e.latlng.lat, e.latlng.lng])
       this.polyline.addLatLng([e.latlng.lat, e.latlng.lng])
+      this.getElevation(e).then(ele => {
+        this.elevations.push(ele)
+        this.updateChart()
+      })
       /*this.polyline.on('mousemove', (e) => {
         if(this.cursor) this.map.removeLayer(this.cursor)
         this.cursor = L.circle([e.latlng.lat, e.latlng.lng], {radius: 7, fillColor: '#34616C', fillOpacity:1, stroke: false})
@@ -320,7 +347,10 @@ export class MapComponent implements OnInit {
     this.map.on('mouseup', () => {
       this.drag = false
       this.num = null
-      if(this.toolID() === 3) this.activateTool(1)
+      if(this.toolID() === 3) {
+        this.activateTool(1)
+        this.updateChart()
+      }
     })
 
     /*let arr = []
