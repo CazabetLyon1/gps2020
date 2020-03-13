@@ -67,7 +67,7 @@ export class MapComponent implements OnInit {
   	dist = dist * 180/Math.PI
   	dist = dist * 60 * 1.1515
   	dist = dist * 1.609344
-  	return dist
+  	return Math.abs(dist)
   }
 
   private zoom = (e): void => {
@@ -136,11 +136,58 @@ export class MapComponent implements OnInit {
         var b = turf.polygon([c])
         //console.log(b)
       }*/
-      let r = turf.lineIntersect(line1, line2)
+      if(c.length > 10) {
+        //let poly = turf.polygon(this.coordinates)
+        let poly = turf.polygon([c as turf.Position[]])
+        let points = this.coordinates.reduce((points, point, i) => {
+          return turf.booleanPointInPolygon(
+            turf.point(point as turf.Position),
+            poly
+          ) ? [...points, i] : points
+        }, [])
+        let z = points.reduce((distances, point1) => {
+          return {
+            ...distances,
+            [point1] : points.reduce((distance, point2) => {
+              return point1 != point2 ? {...distance, [point2] : this.distance(
+                this.coordinates[point1][0],
+                this.coordinates[point1][1],
+                this.coordinates[point2][0],
+                this.coordinates[point2][1]
+              )} : distance
+          }, {})}
+        }, {})
+        let idx = Object.entries(z).reduce((res, [d_i, x], i, array) => {
+          //return distance < array[index][1] ? d_i : index
+          let distance = Object.entries(x).reduce((a, [b, c]) => a + c, 0)
+          return distance < res.distance || !res.distance
+          ? {
+            idx : d_i,
+            distance : distance
+          }
+          : res
+        }, {
+          idx: 0,
+          distance: false
+        })
+        this.toAdd = []
+        points.forEach(point => {
+          if(idx.idx != point && this.distance(
+            this.coordinates[idx.idx][0],
+            this.coordinates[idx.idx][1],
+            this.coordinates[point][0],
+            this.coordinates[point][1]
+          ) < 0.1) {
+            this.toAdd.push(point)
+          }
+        })
+      }
+
+      //let r = turf.lineIntersect(line1, line2)
       //if(this.preview) this.map.removeLayer(this.preview)
       //this.preview = L.polyline(r.features.map(x => x.geometry.coordinates as L.LatLngExpression), {weight: 3, color: '#3379FF'}).addTo(this.map)
       //this.toAdd = r.features.map(x => x.geometry.coordinates as L.LatLngExpression)
-      this.toAdd = r.features.map(x => new L.LatLng(x.geometry.coordinates[0], x.geometry.coordinates[1]))
+      //this.toAdd = r.features.map(x => new L.LatLng(x.geometry.coordinates[0], x.geometry.coordinates[1]))
       //console.log(r)
     }
   }
@@ -200,6 +247,7 @@ export class MapComponent implements OnInit {
     //this.circles.push(L.circle(Array.isArray(e) ? (e as L.LatLngExpression) : [e.latlng.lat, e.latlng.lng],
     this.circles.push(L.circle([e.latlng.lat, e.latlng.lng],
       {
+        className: "aa",
         radius: 10,
         fillColor: '#34616C',
         fillOpacity:1,
@@ -224,9 +272,11 @@ export class MapComponent implements OnInit {
       })
       .on('mouseover', (e) => {
         //console.log(e.target)
-        e.target.setStyle({
-          radius: 200,
-        })
+        e.target.setRadius(15)
+        e.target._path.classList.add("kjkh")
+      })
+      .on('mouseout', (e) => {
+        e.target.setRadius(10)
       })
       .on('click', (e) => {
         if (this.toolID() === 2) {
@@ -240,6 +290,7 @@ export class MapComponent implements OnInit {
   private addShortcut = (): void => {
     this.toAdd.forEach((point, i) => {
       let idx = this.coordinates.findIndex((x,i,t) => L.GeometryUtil.belongsSegment(point, new L.LatLng(t[i][0], t[i][1]), new L.LatLng(t[i+1][0], t[i+1][1])))
+      console.log(idx)
       if(i === 0) {
         this.coordinates.splice(idx+1, 0, [point.lat, point.lng])
       } else {
@@ -336,9 +387,17 @@ export class MapComponent implements OnInit {
     this.map.on('mousemove', this.select)
     this.map.on('mouseup', () => {
       if(this.toAdd) {
-        this.addShortcut()
+        //this.addShortcut()
+        this.toAdd.forEach(idx => {
+          console.log('remove',idx)
+          this.coordinates.splice(idx, 1)
+          this.elevations.splice(idx, 1)
+          this.updateChart()
+          this.draw()
+        })
         this.map.removeLayer(this.lasso)
         this.lasso = null
+        this.toAdd = null
       }
     })
     this.map.on('mousedown', () => {
