@@ -37,6 +37,7 @@ export class MapComponent implements OnInit {
   private lasso
   private preview = null
   private toAdd
+  private coordinateToRequest
 
   constructor() {}
 
@@ -202,6 +203,7 @@ export class MapComponent implements OnInit {
       this.map.dragging.disable()
     }
     if(this.drag && (this.toolID() === 1 || this.toolID() === 3)) {
+      //L.DomUtil.addClass(this.map._container,'grabbing-cursor')
       this.activateTool(3)
       let c = this.coordinates.slice(0)
       c.splice(this.num, 1)
@@ -212,10 +214,7 @@ export class MapComponent implements OnInit {
         console.log(this.distance(e.latlng.lat, e.latlng.lng, coord[0], coord[1]))
       })*/
       this.coordinates[this.num] = near || [e.latlng.lat, e.latlng.lng]
-      this.getElevation(e).then(ele => {
-        this.elevations[this.num] = ele
-        //this.updateChart()
-      })
+      this.coordinateToRequest = e
       this.draw()
     }
   }
@@ -247,7 +246,7 @@ export class MapComponent implements OnInit {
     //this.circles.push(L.circle(Array.isArray(e) ? (e as L.LatLngExpression) : [e.latlng.lat, e.latlng.lng],
     this.circles.push(L.circle([e.latlng.lat, e.latlng.lng],
       {
-        className: "aa",
+        className: "grab-cursor",
         radius: 10,
         fillColor: '#34616C',
         fillOpacity:1,
@@ -260,7 +259,7 @@ export class MapComponent implements OnInit {
       .on('mouseover', (e) => {
         //console.log('jhkjh')
         //document.body.style.cursor = "wait"
-        //L.DomUtil.addClass(this.map._container,'move-cursor-enabled');
+        //L.DomUtil.addClass(this.map._container,'move-cursor-enabled')
       })
       .on('mousedown', (e) => {
         this.bool = false
@@ -272,7 +271,9 @@ export class MapComponent implements OnInit {
       })
       .on('mouseover', (e) => {
         //console.log(e.target)
-        e.target.setRadius(15)
+        if(this.toolID() != 0) {
+          e.target.setRadius(15)
+        }
         e.target._path.classList.add("kjkh")
       })
       .on('mouseout', (e) => {
@@ -405,11 +406,42 @@ export class MapComponent implements OnInit {
     })
     this.map.on('mouseup', () => {
       this.drag = false
-      this.num = null
       if(this.toolID() === 3) {
+        this.getElevation(this.coordinateToRequest).then(ele => {
+          this.elevations[this.num] = ele
+          this.updateChart()
+          this.num = null
+        })
         this.activateTool(1)
-        this.updateChart()
       }
+    })
+
+    Array.from(document.querySelectorAll("input[name='tools']"))
+    .forEach((input, i, array) => {
+      input.addEventListener('change', (e) => {
+        let idx = array.indexOf(e.target as Element)
+        let className
+        switch(idx) {
+          case 0:
+            className = "grab-cursor"
+            break
+          case 2:
+            className = "delete-cursor"
+            break
+          /*case 3:
+            className = "grabbing-cursor"
+            break*/
+        }
+        L.DomUtil.removeClass(this.map._container,'add-cursor')
+        if([0, 2].includes(idx)) {
+          this.circles.forEach(circle => {
+            //circle._path.className = ''
+            circle._path.classList.add(className)
+          })
+        } else if(idx === 1) {
+          L.DomUtil.addClass(this.map._container,'add-cursor')
+        }
+      })
     })
 
     /*let arr = []
