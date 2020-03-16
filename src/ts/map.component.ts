@@ -32,6 +32,7 @@ export class MapComponent implements OnInit {
   private elevations: any = []
   private polyline
   private circles: any = []
+  private point
   private bool: boolean = true
   private drag: boolean = false
   private num: number = null
@@ -290,11 +291,25 @@ export class MapComponent implements OnInit {
         e.target._path.classList.add("kjkh")
       })
       .on('mouseout', (e) => {
-        e.target.setRadius(10)
+        console.log('mouseout')
+        if(e.target !== this.point) {
+          e.target.setRadius(10)
+        }
       })
       .on('click', (e) => {
         if (this.toolID() === 2) {
           this.delete(e)
+        } else if(this.toolID() === 1) {
+          L.DomEvent.stop(e)
+          if(this.point) {
+            this.point.setRadius(10)
+          }
+          document.getElementById("lat").textContent = e.target._latlng.lat
+          document.getElementById("lat").style.color = "#34616C"
+          document.getElementById("lng").textContent = e.target._latlng.lng
+          document.getElementById("lng").style.color = "#34616C"
+          this.point = e.target
+          e.target.setRadius(15)
         }
       }))
       //this.circles[this.circles.length-1].setZIndex(this.circles.length)
@@ -441,6 +456,12 @@ export class MapComponent implements OnInit {
     })
     this.map.on('mousedown', () => {
       this.drag = true
+    })
+    this.map.on('click', () => {
+      if(this.point) {
+        this.point.setRadius(10)
+        this.point = null
+      }
     })
     this.map.on('mouseup', () => {
       this.drag = false
