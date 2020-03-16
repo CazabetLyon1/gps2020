@@ -26,6 +26,8 @@ export class MapComponent implements OnInit {
 
   private map
   private token: string = "pk.eyJ1IjoiYW1hdXJ5ZyIsImEiOiJjazZxd3l5cHYwMTdnM21sOXM3Z3MxeWx3In0.VfaiCkcJq4e-UWo5ysP34Q"
+  private history: any = []
+  private historyIndex: number = -1
   private coordinates: any = []
   private elevations: any = []
   private polyline
@@ -316,16 +318,19 @@ export class MapComponent implements OnInit {
     let idx = this.circles.findIndex(x => x === e.target)
     this.coordinates.splice(idx, 1)
     this.elevations.splice(idx, 1)
+    this.saveState()
     this.updateChart()
     this.draw()
   }
 
   private add = (e): void => {
+    console.log('heyy')
     if (this.toolID() === 1 && this.bool) {
       this.coordinates.push([e.latlng.lat, e.latlng.lng])
       this.polyline.addLatLng([e.latlng.lat, e.latlng.lng])
       this.getElevation(e).then(ele => {
         this.elevations.push(ele)
+        this.saveState()
         this.updateChart()
       })
       /*this.polyline.on('mousemove', (e) => {
@@ -344,8 +349,30 @@ export class MapComponent implements OnInit {
     this.bool = true
   }
 
-  private initMap(): void {
+  private saveState = (): void => {
+    let x = this.coordinates.slice(0, this.coordinates.length)
+    let y = this.elevations.slice(0, this.coordinates.length)
+    if(this.historyIndex+1 !== this.history.length) {
+      this.historyIndex = this.history.length-1
+      this.history.splice(this.historyIndex+1, 0, this.history[this.historyIndex-1])
+      this.historyIndex++
+      let redo = (document.getElementById("redo") as HTMLButtonElement)
+      if(!redo.disabled) {
+          redo.disabled = true
+      }
+    }
+    this.history.splice(this.historyIndex+1, 0, {
+      coordinates : x,
+      elevations : y,
+    })
+    this.historyIndex++
+    if(this.historyIndex !== 0) {
+      (document.getElementById("undo") as HTMLButtonElement).disabled = false
+    }
+  }
 
+  private initMap(): void {
+    this.saveState()
     this.map = L.map('map', {
       center: [ 45.778480529785156, 4.8537468910217285 ],
       zoom: 16,
@@ -393,6 +420,7 @@ export class MapComponent implements OnInit {
           console.log('remove',idx)
           this.coordinates.splice(idx, 1)
           this.elevations.splice(idx, 1)
+          this.saveState()
           this.updateChart()
           this.draw()
         })
@@ -409,10 +437,42 @@ export class MapComponent implements OnInit {
       if(this.toolID() === 3) {
         this.getElevation(this.coordinateToRequest).then(ele => {
           this.elevations[this.num] = ele
+          this.saveState()
           this.updateChart()
           this.num = null
         })
         this.activateTool(1)
+      }
+    })
+
+    document.getElementById("undo").addEventListener('click', (e) => {
+      this.historyIndex--
+      console.log(this.historyIndex)
+      this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
+      this.elevations = this.history[this.historyIndex].elevations.slice(0)
+      this.draw()
+      let redo = (document.getElementById("redo") as HTMLButtonElement)
+      if(redo.disabled) {
+          redo.disabled = false
+      }
+      let undo = (document.getElementById("undo") as HTMLButtonElement)
+      if(this.historyIndex === 0) {
+          undo.disabled = true
+      }
+    })
+
+    document.getElementById("redo").addEventListener('click', () => {
+      this.historyIndex++
+      this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
+      this.elevations = this.history[this.historyIndex].elevations.slice(0)
+      this.draw()
+      let redo = (document.getElementById("redo") as HTMLButtonElement)
+      if(this.historyIndex+1 === this.history.length) {
+          redo.disabled = true
+      }
+      let undo = (document.getElementById("undo") as HTMLButtonElement)
+      if(this.historyIndex !== 0) {
+          undo.disabled = false
       }
     })
 
