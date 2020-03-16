@@ -40,6 +40,7 @@ export class MapComponent implements OnInit {
   private preview = null
   private toAdd
   private coordinateToRequest
+  private fusion = null
 
   constructor() {}
 
@@ -217,6 +218,16 @@ export class MapComponent implements OnInit {
       })*/
       this.coordinates[this.num] = near || [e.latlng.lat, e.latlng.lng]
       this.coordinateToRequest = e
+
+      if(near) {
+        let coo = this.coordinates.reduce((tab, el, i) => {
+          return el[0] === near[0] && el[1] === near[1] ? [...tab, i] : tab
+        }, [])
+        if(Math.abs(coo[0] - coo[1]) === 1) {
+          this.fusion = this.num
+        }
+      }
+
       this.draw()
     }
   }
@@ -324,7 +335,6 @@ export class MapComponent implements OnInit {
   }
 
   private add = (e): void => {
-    console.log('heyy')
     if (this.toolID() === 1 && this.bool) {
       this.coordinates.push([e.latlng.lat, e.latlng.lng])
       this.polyline.addLatLng([e.latlng.lat, e.latlng.lng])
@@ -435,19 +445,30 @@ export class MapComponent implements OnInit {
     this.map.on('mouseup', () => {
       this.drag = false
       if(this.toolID() === 3) {
-        this.getElevation(this.coordinateToRequest).then(ele => {
-          this.elevations[this.num] = ele
+        if(this.fusion) {
+          this.coordinates.splice(this.fusion, 1)
+          this.elevations.splice(this.fusion, 1)
+          this.fusion = null
           this.saveState()
           this.updateChart()
+          this.draw()
           this.num = null
-        })
+          this.coordinateToRequest = null
+        } else {
+          this.getElevation(this.coordinateToRequest).then(ele => {
+            this.elevations[this.num] = ele
+            this.saveState()
+            this.updateChart()
+            this.num = null
+            this.coordinateToRequest = null
+          })
+        }
         this.activateTool(1)
       }
     })
 
     document.getElementById("undo").addEventListener('click', (e) => {
       this.historyIndex--
-      console.log(this.historyIndex)
       this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
       this.elevations = this.history[this.historyIndex].elevations.slice(0)
       this.draw()
