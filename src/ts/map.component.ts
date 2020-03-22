@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import PouchDB from 'pouchdb'
 import * as L from 'leaflet'
+import * as Lh from 'leaflet-hotline'
 import 'leaflet.tilelayer.pouchdbcached'
 import 'leaflet-geometryutil'
 import * as turf from '@turf/turf'
@@ -43,6 +44,9 @@ export class MapComponent implements OnInit {
   private coordinateToRequest
   private fusion = null
 
+  private undo: HTMLElement = document.getElementById("undo")
+  private redo: HTMLElement = document.getElementById("redo")
+
   constructor() {}
 
   ngOnInit(): void {
@@ -81,23 +85,50 @@ export class MapComponent implements OnInit {
       //this.map.zoomIn()
     }
   }
+  //min:160 et max:170
+  private drawPolyline = (): void => {
+    if(this.coordinates.length > 1) {
+      if(this.polyline) this.map.removeLayer(this.polyline)
+      //let max = this.elevations.length > 0 ? Math.max(...this.elevations) : 1
+      //let min = this.elevations.length > 0 ? Math.min(...this.elevations) : 0
+      let min = this.elevations.reduce((min, ele) => min > ele ? ele : min)
+      let max = this.elevations.reduce((max, ele) => max < ele ? ele : max)
+      if(min === max) max++
+      let data = this.coordinates.map((x, i) => {
+        return [...x, this.elevations.length >= i+1 ? this.elevations[i] : Math.min(...this.elevations)]
+      })
+      this.polyline = Lh.hotline(data,
+        {
+          weight: 3,
+          //color: '#3379FF',
+          outlineWidth: 0,
+          //outlineColor: "black",
+          palette: {
+            0 : "hsl(219, 100%, 60%)",
+            1 : "hsl(219, 100%, 30%)"
+          },
+          min: min,
+          max: max
+        }
+      ).addTo(this.map)
+      this.polyline.on('mousedown', (e) => {
+        if(this.toolID() === 1) {
+          this.bool = false
+          let i = e.target.getLatLngs().findIndex((x,i,t) => L.GeometryUtil.belongsSegment(e.latlng, t[i], t[i+1]))
+          this.addToIndex(e, i+1)
+          this.drag = true
+          this.num = i+1
+        }
+      })
+    }
+  }
 
   private draw = (): void => {
     this.circles.forEach(layer => {
       this.map.removeLayer(layer)
     })
     this.circles = []
-    if(this.polyline) this.map.removeLayer(this.polyline)
-    this.polyline = L.polyline(this.coordinates, {weight: 3, color: '#3379FF'}).addTo(this.map)
-    this.polyline.on('mousedown', (e) => {
-      if(this.toolID() === 1) {
-        this.bool = false
-        let i = e.target.getLatLngs().findIndex((x,i,t) => L.GeometryUtil.belongsSegment(e.latlng, t[i], t[i+1]))
-        this.addToIndex(e, i+1)
-        this.drag = true
-        this.num = i+1
-      }
-    })
+    this.drawPolyline()
     this.coordinates.forEach(coord => {
       this.addMarker({
         latlng: {
@@ -335,6 +366,8 @@ export class MapComponent implements OnInit {
     this.coordinates.splice(idx, 0, [e.latlng.lat, e.latlng.lng])
     this.getElevation(e).then(ele => {
       this.elevations.splice(idx, 0, ele)
+      this.drawPolyline()
+      this.saveState()
       this.updateChart()
     })
     this.draw()
@@ -352,9 +385,10 @@ export class MapComponent implements OnInit {
   private add = (e): void => {
     if (this.toolID() === 1 && this.bool) {
       this.coordinates.push([e.latlng.lat, e.latlng.lng])
-      this.polyline.addLatLng([e.latlng.lat, e.latlng.lng])
+      //this.polyline.addLatLng([e.latlng.lat, e.latlng.lng])
       this.getElevation(e).then(ele => {
         this.elevations.push(ele)
+        this.drawPolyline()
         this.saveState()
         this.updateChart()
       })
@@ -370,6 +404,7 @@ export class MapComponent implements OnInit {
       this.addMarker(e)
       this.drag = true
       this.num = this.coordinates.length-1
+      this.draw()
     }
     this.bool = true
   }
@@ -381,7 +416,7 @@ export class MapComponent implements OnInit {
       this.historyIndex = this.history.length-1
       this.history.splice(this.historyIndex+1, 0, this.history[this.historyIndex-1])
       this.historyIndex++
-      let redo = (document.getElementById("redo") as HTMLButtonElement)
+      let redo = (this.redo as HTMLButtonElement)
       if(!redo.disabled) {
           redo.disabled = true
       }
@@ -392,7 +427,7 @@ export class MapComponent implements OnInit {
     })
     this.historyIndex++
     if(this.historyIndex !== 0) {
-      (document.getElementById("undo") as HTMLButtonElement).disabled = false
+      (this.undo as HTMLButtonElement).disabled = false
     }
   }
 
@@ -478,6 +513,7 @@ export class MapComponent implements OnInit {
         } else {
           this.getElevation(this.coordinateToRequest).then(ele => {
             this.elevations[this.num] = ele
+            this.drawPolyline()
             this.saveState()
             this.updateChart()
             this.num = null
@@ -488,31 +524,53 @@ export class MapComponent implements OnInit {
       }
     })
 
-    document.getElementById("undo").addEventListener('click', (e) => {
+    /*Lh.hotline([[45.77767051754706, 4.848468303680421, 1], [45.77909222517648, 4.856171607971192, 0], [45.777505896427286, 4.8589396476745605, 0.5]],
+    {
+      weight: 4,
+      outlineWidth: 0,
+      //outlineColor: "orange",
+      palette: {
+        0: "hsl(219, 100%, 60%)",
+        1: "hsl(219, 100%, 30%)"
+      }
+    }).addTo(this.map)
+
+    Lh.hotline([[45.776607954491375, 4.854261875152589, 1], [45.7811723425975, 4.861557483673096, 1]],
+      {
+        weight: 4,
+        outlineWidth: 0,
+        //outlineColor: "orange",
+        palette: {
+          0: "hsl(219, 100%, 60%)",
+          1: "hsl(219, 100%, 30%)"
+        }
+      }).addTo(this.map)*/
+
+    this.undo.addEventListener('click', (e) => {
       this.historyIndex--
       this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
       this.elevations = this.history[this.historyIndex].elevations.slice(0)
       this.draw()
-      let redo = (document.getElementById("redo") as HTMLButtonElement)
+      let redo = (this.redo as HTMLButtonElement)
       if(redo.disabled) {
           redo.disabled = false
       }
-      let undo = (document.getElementById("undo") as HTMLButtonElement)
+      let undo = (this.undo as HTMLButtonElement)
       if(this.historyIndex === 0) {
           undo.disabled = true
       }
     })
 
-    document.getElementById("redo").addEventListener('click', () => {
+    this.redo.addEventListener('click', () => {
       this.historyIndex++
       this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
       this.elevations = this.history[this.historyIndex].elevations.slice(0)
       this.draw()
-      let redo = (document.getElementById("redo") as HTMLButtonElement)
+      let redo = (this.redo as HTMLButtonElement)
       if(this.historyIndex+1 === this.history.length) {
           redo.disabled = true
       }
-      let undo = (document.getElementById("undo") as HTMLButtonElement)
+      let undo = (this.undo as HTMLButtonElement)
       if(this.historyIndex !== 0) {
           undo.disabled = false
       }

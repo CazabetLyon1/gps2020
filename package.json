@@ -7,7 +7,8 @@
   "main": "./dist/server.js",
   "scripts": {
     "start": "nodemon ./dist/server.js",
-    "dev": "webpack --config webpack.server.config.js"
+    "dev": "webpack --config webpack.server.config.js",
+    "prod": "webpack --mode production --config webpack.server.config.js"
   },
   "dependencies": {
     "@angular/animations": "^9.0.1",
@@ -59,6 +60,7 @@
     "file-loader": "^5.0.2",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^4.0.0-beta.8",
+    "leaflet-hotline": "^0.4.0",
     "node-sass": "^4.13.1",
     "nodemon": "^1.19.4",
     "raw-loader": "^3.1.0",

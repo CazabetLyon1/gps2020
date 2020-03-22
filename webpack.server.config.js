@@ -4,7 +4,10 @@ const nodeExternals = require('webpack-node-externals')
 const WebpackShellPlugin = require('webpack-shell-plugin')
 
 module.exports = (env, argv) => {
-  const SERVER_PATH = './src/server/server.dev.js'
+  //const SERVER_PATH = './src/server/server.dev.js'
+  const SERVER_PATH = argv.mode === 'production'
+  ? './src/server/server.prod.js'
+  : './src/server/server.dev.js'
   return ({
       entry: {
         server: SERVER_PATH,
@@ -37,8 +40,16 @@ module.exports = (env, argv) => {
       },
       plugins: [
         new WebpackShellPlugin({
-          onBuildStart: ['webpack --config webpack.dev.config.js'],
-          onBuildEnd: ['nodemon ./dist/server.js --config nodemon.json'],
+          onBuildStart: [
+            argv.mode === 'production'
+            ? 'webpack --mode production --config webpack.prod.config.js'
+            : 'webpack --config webpack.dev.config.js'
+          ],
+          onBuildEnd: [
+            argv.mode === 'production'
+            ? 'node ./dist/server.js'
+            : 'nodemon ./dist/server.js --config nodemon.json'
+          ],
         })
       ]
     })
