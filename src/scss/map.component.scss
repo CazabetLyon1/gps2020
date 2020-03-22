@@ -30,6 +30,11 @@
   height: 100%;
 }
 
+leaflet-map {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 #map {
   height: 100%;
 }

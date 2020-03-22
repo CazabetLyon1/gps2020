@@ -53,17 +53,39 @@ export class MapComponent implements OnInit {
     this.initMap()
   }
 
+  /**
+   * Récupérer l'index de l'outil selectionné
+   *
+   * @return {number}
+   * Example : si l'outil lasso est selectionné, le resultat est 4
+  **/
   private toolID = (): number => {
     return Array.from(document.querySelectorAll("input[name='tools']"))
       .findIndex(x => (x as HTMLInputElement).checked)
   }
 
+  /**
+   * Activer manuellement un outil
+   *
+   * @param {number} idx -> index de l'outil à activé
+   * Example : pour activer le lasso, idx = 4
+  **/
   private activateTool = (idx): void => {
     var i = Array.from(document.querySelectorAll("input[name='tools']"))[idx] as HTMLInputElement
     i.checked = true
     i.dispatchEvent(new Event('change'))
   }
 
+  /**
+   * Calculer la distance entre deux coordonnées GPS
+   *
+   * @param {number} lat1 -> latitude du point n°1
+   * @param {number} lng1 -> longitude du point n°1
+   * @param {number} lat2 -> latitude du point n°2
+   * @param {number} lng2 -> longitude du point n°2
+   *
+   * @return {number} distance entre les deux points en km
+  **/
   private distance = (lat1, lng1, lat2, lng2): any => {
   	if (lat1 == lat2 && lng1 == lng2) return 0
   	let radlat1 = Math.PI * lat1/180
@@ -79,13 +101,21 @@ export class MapComponent implements OnInit {
   	return Math.abs(dist)
   }
 
+  /**
+   * Recentrer la map autour d'une coordonnée
+   *
+   * @param {LeafletEvent} e
+  **/
   private zoom = (e): void => {
     if (this.toolID() === 0) {
       this.map.setView(e.latlng)
       //this.map.zoomIn()
     }
   }
-  //min:160 et max:170
+
+  /**
+   * Redessiner la polyline et l'ajouter à la map
+  **/
   private drawPolyline = (): void => {
     if(this.coordinates.length > 1) {
       if(this.polyline) this.map.removeLayer(this.polyline)
@@ -120,9 +150,21 @@ export class MapComponent implements OnInit {
           this.num = i+1
         }
       })
+      /*this.polyline.on('mousemove', (e) => {
+        if(this.cursor) this.map.removeLayer(this.cursor)
+        this.cursor = L.circle([e.latlng.lat, e.latlng.lng], {radius: 7, fillColor: '#34616C', fillOpacity:1, stroke: false})
+          .addTo(this.map)
+      })*/
+      /*this.polyline.on('mouseout', (e) => {
+        if(this.cursor) this.map.removeLayer(this.cursor)
+        this.cursor = null
+      })*/
     }
   }
 
+  /**
+   * Redessiner toute la trace (polyline et circles)
+  **/
   private draw = (): void => {
     this.circles.forEach(layer => {
       this.map.removeLayer(layer)
@@ -136,22 +178,14 @@ export class MapComponent implements OnInit {
           lng: coord[1]
         }
       })
-      /*this.circles.push(L.circle(coord, {radius: 10, fillColor: '#34616C', fillOpacity:1, stroke: false})
-        .addTo(this.map)
-        .on('mousedown', (e) => {
-          this.bool = false
-          this.drag = true
-          this.num = this.coordinates.findIndex(x => x[0] === (e as L.LeafletMouseEvent).latlng.lat && x[1] === (e as L.LeafletMouseEvent).latlng.lng)
-        })
-        .on('mouseover', (e) => {
-          console.log(e.target)
-          e.target.setStyle({
-            radius: 200,
-          })
-        }))*/
     })
   }
 
+  /**
+   * L'outil lasso
+   *
+   * @param {LeafletEvent}
+  **/
   private select = (e): void => {
     if(this.toolID() === 4 && this.drag) {
       if(!this.lasso) this.lasso = L.polygon([], {
@@ -228,6 +262,11 @@ export class MapComponent implements OnInit {
     }
   }
 
+  /**
+   * L'outil déplacement
+   *
+   * @param {LeafletEvent}
+  **/
   private move = (e): void => {
     if (this.toolID() === 0) {
       document.getElementById("lat").textContent = e.latlng.lat
@@ -264,6 +303,9 @@ export class MapComponent implements OnInit {
     }
   }
 
+  /**
+   * Actualiser le graphe ApexCharts
+  **/
   private updateChart = (): void => {
     window.ApexCharts.exec("elevation-chart", "updateSeries", [
       {
@@ -272,6 +314,13 @@ export class MapComponent implements OnInit {
     ])
   }
 
+  /**
+   * Récupérer l'altitude d'un point GPS de manière asynchrone
+   *
+   * @param {LeafletEvent}
+   *
+   * @return {Promise}
+  **/
   private getElevation = (e): any => {
     return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest()
@@ -287,6 +336,11 @@ export class MapComponent implements OnInit {
     })
   }
 
+  /**
+   * Dessiner un point (circle) sur la map
+   *
+   * @param {LeafletEvent}
+  **/
   private addMarker = (e): void => {
     //this.circles.push(L.circle(Array.isArray(e) ? (e as L.LatLngExpression) : [e.latlng.lat, e.latlng.lng],
     this.circles.push(L.circle([e.latlng.lat, e.latlng.lng],
@@ -322,7 +376,7 @@ export class MapComponent implements OnInit {
         e.target._path.classList.add("kjkh")
       })
       .on('mouseout', (e) => {
-        console.log('mouseout')
+        //console.log('mouseout')
         if(e.target !== this.point) {
           e.target.setRadius(10)
         }
@@ -347,7 +401,7 @@ export class MapComponent implements OnInit {
       //this.circles[this.circles.length-1].bringToFront()
   }
 
-  private addShortcut = (): void => {
+  /*private addShortcut = (): void => {
     this.toAdd.forEach((point, i) => {
       let idx = this.coordinates.findIndex((x,i,t) => L.GeometryUtil.belongsSegment(point, new L.LatLng(t[i][0], t[i][1]), new L.LatLng(t[i+1][0], t[i+1][1])))
       console.log(idx)
@@ -360,8 +414,14 @@ export class MapComponent implements OnInit {
     })
     this.toAdd = null
     this.draw()
-  }
+  }*/
 
+  /**
+   * Ajouter un point à la trace GPS
+   *
+   * @param {LeafletEvent} e
+   * @param {number} idx -> position du point à ajouter
+  **/
   private addToIndex = (e, idx): void => {
     this.coordinates.splice(idx, 0, [e.latlng.lat, e.latlng.lng])
     this.getElevation(e).then(ele => {
@@ -373,6 +433,11 @@ export class MapComponent implements OnInit {
     this.draw()
   }
 
+  /**
+   * Supprimer un point de la trace GPS
+   *
+   * @param {LeafletEvent} e
+  **/
   private delete = (e): void => {
     let idx = this.circles.findIndex(x => x === e.target)
     this.coordinates.splice(idx, 1)
@@ -382,6 +447,11 @@ export class MapComponent implements OnInit {
     this.draw()
   }
 
+  /**
+   * Ajouter un point en fin de trace GPS
+   *
+   * @param {LeafletEvent} e
+  **/
   private add = (e): void => {
     if (this.toolID() === 1 && this.bool) {
       this.coordinates.push([e.latlng.lat, e.latlng.lng])
@@ -392,15 +462,6 @@ export class MapComponent implements OnInit {
         this.saveState()
         this.updateChart()
       })
-      /*this.polyline.on('mousemove', (e) => {
-        if(this.cursor) this.map.removeLayer(this.cursor)
-        this.cursor = L.circle([e.latlng.lat, e.latlng.lng], {radius: 7, fillColor: '#34616C', fillOpacity:1, stroke: false})
-          .addTo(this.map)
-      })*/
-      /*this.polyline.on('mouseout', (e) => {
-        if(this.cursor) this.map.removeLayer(this.cursor)
-        this.cursor = null
-      })*/
       this.addMarker(e)
       this.drag = true
       this.num = this.coordinates.length-1
@@ -409,6 +470,9 @@ export class MapComponent implements OnInit {
     this.bool = true
   }
 
+  /**
+   * Sauver un état de la trace dans l'historique
+  **/
   private saveState = (): void => {
     let x = this.coordinates.slice(0, this.coordinates.length)
     let y = this.elevations.slice(0, this.coordinates.length)
@@ -431,6 +495,51 @@ export class MapComponent implements OnInit {
     }
   }
 
+  /**
+   * Revenir en arrière dans l'historique
+   *
+   * @param {LeafletEvent}
+  **/
+  private prev = (e): void => {
+    this.historyIndex--
+    this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
+    this.elevations = this.history[this.historyIndex].elevations.slice(0)
+    this.draw()
+    this.updateChart()
+    let redo = (this.redo as HTMLButtonElement)
+    if(redo.disabled) {
+        redo.disabled = false
+    }
+    let undo = (this.undo as HTMLButtonElement)
+    if(this.historyIndex === 0) {
+        undo.disabled = true
+    }
+  }
+
+  /**
+   * Revenir en avant dans l'historique
+   *
+   * @param {LeafletEvent}
+  **/
+  private next = (e): void => {
+    this.historyIndex++
+    this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
+    this.elevations = this.history[this.historyIndex].elevations.slice(0)
+    this.draw()
+    this.updateChart()
+    let redo = (this.redo as HTMLButtonElement)
+    if(this.historyIndex+1 === this.history.length) {
+        redo.disabled = true
+    }
+    let undo = (this.undo as HTMLButtonElement)
+    if(this.historyIndex !== 0) {
+        undo.disabled = false
+    }
+  }
+
+  /**
+   * Initialisation de la map et ajout des EventListener
+  **/
   private initMap(): void {
     this.saveState()
     this.map = L.map('map', {
@@ -453,17 +562,17 @@ export class MapComponent implements OnInit {
     })
     tiles.addTo(this.map)
 
-    tiles.on('tilecachehit', (e) => {
-      //console.log(e.url)
+    /*tiles.on('tilecachehit', (e) => {
+      console.log(e.url)
     })
 
     tiles.on('tilecachemiss', (e) => {
-      //console.log(e.url)
+      console.log(e.url)
     })
 
     tiles.on('tilecacheerror', (e) => {
       console.log(e)
-    })
+    })*/
 
     L.control.zoom({
       position: 'bottomright'
@@ -524,57 +633,8 @@ export class MapComponent implements OnInit {
       }
     })
 
-    /*Lh.hotline([[45.77767051754706, 4.848468303680421, 1], [45.77909222517648, 4.856171607971192, 0], [45.777505896427286, 4.8589396476745605, 0.5]],
-    {
-      weight: 4,
-      outlineWidth: 0,
-      //outlineColor: "orange",
-      palette: {
-        0: "hsl(219, 100%, 60%)",
-        1: "hsl(219, 100%, 30%)"
-      }
-    }).addTo(this.map)
-
-    Lh.hotline([[45.776607954491375, 4.854261875152589, 1], [45.7811723425975, 4.861557483673096, 1]],
-      {
-        weight: 4,
-        outlineWidth: 0,
-        //outlineColor: "orange",
-        palette: {
-          0: "hsl(219, 100%, 60%)",
-          1: "hsl(219, 100%, 30%)"
-        }
-      }).addTo(this.map)*/
-
-    this.undo.addEventListener('click', (e) => {
-      this.historyIndex--
-      this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
-      this.elevations = this.history[this.historyIndex].elevations.slice(0)
-      this.draw()
-      let redo = (this.redo as HTMLButtonElement)
-      if(redo.disabled) {
-          redo.disabled = false
-      }
-      let undo = (this.undo as HTMLButtonElement)
-      if(this.historyIndex === 0) {
-          undo.disabled = true
-      }
-    })
-
-    this.redo.addEventListener('click', () => {
-      this.historyIndex++
-      this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
-      this.elevations = this.history[this.historyIndex].elevations.slice(0)
-      this.draw()
-      let redo = (this.redo as HTMLButtonElement)
-      if(this.historyIndex+1 === this.history.length) {
-          redo.disabled = true
-      }
-      let undo = (this.undo as HTMLButtonElement)
-      if(this.historyIndex !== 0) {
-          undo.disabled = false
-      }
-    })
+    this.undo.addEventListener('click', this.prev)
+    this.redo.addEventListener('click', this.next)
 
     Array.from(document.querySelectorAll("input[name='tools']"))
     .forEach((input, i, array) => {
@@ -603,18 +663,6 @@ export class MapComponent implements OnInit {
         }
       })
     })
-
-    /*let arr = []
-    this.map.on('click', (e) => {
-      console.log(e)
-      arr.push([e.latlng.lat, e.latlng.lng])
-      L.polyline(arr, {color: '#3379FF'}).addTo(this.map)
-      arr.forEach(coord => {
-        L.circle(coord, {radius: 7, fillColor: '#34616C', fillOpacity:1, stroke: false}).addTo(this.map).on('click', (e) => {
-          console.log(e)
-        })
-      })
-    })*/
 
   }
 
