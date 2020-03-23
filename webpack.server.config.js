@@ -48,7 +48,7 @@ module.exports = (env, argv) => {
           onBuildEnd: [
             argv.mode === 'production'
             //? 'node ./dist/server.js'
-            ? 'forever start ./dist/server.js'
+            ? 'pm2 start ./dist/server.js'
             : 'nodemon ./dist/server.js --config nodemon.json'
           ],
         })
