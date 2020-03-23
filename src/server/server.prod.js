@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
   file ? res.sendFile(file, {root: __dirname}) : res.send("error")
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, "lif.sci-web.net/~lifprojet-gps"() => {
     console.log(`App listening to ${PORT}....`)
     console.log('Press Ctrl+C to quit.')
 })
