@@ -5,6 +5,7 @@ import bodyParser from 'body-parser'
 import mysql from 'mysql2'
 
 const PORT = process.env.PORT || 8080
+const HOST = "lif.sci-web.net"
 const app = express()
 const jsonParser = bodyParser.json()
 
@@ -17,7 +18,7 @@ app.get('/', (req, res) => {
   file ? res.sendFile(file, {root: __dirname}) : res.send("error")
 })
 
-app.listen(PORT, "lif.sci-web.net/~lifprojet-gps", () => {
-    console.log(`App listening to ${PORT}....`)
+app.listen(PORT, HOST, () => {
+    console.log(`App listening to http://${HOST}:${PORT}....`)
     console.log('Press Ctrl+C to quit.')
 })
