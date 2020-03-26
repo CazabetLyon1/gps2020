@@ -47,6 +47,8 @@ export class MapComponent implements OnInit {
   private undo: HTMLElement = document.getElementById("undo")
   private redo: HTMLElement = document.getElementById("redo")
 
+  private import: HTMLButtonElement = document.getElementById("import") as HTMLButtonElement
+
   constructor() {}
 
   ngOnInit(): void {
@@ -117,18 +119,19 @@ export class MapComponent implements OnInit {
    * Redessiner la polyline et l'ajouter à la map
   **/
   private drawPolyline = (): void => {
-    if(this.coordinates.length > 1) {
-      if(this.polyline) this.map.removeLayer(this.polyline)
+    if(this.polyline) this.map.removeLayer(this.polyline)
+    if(this.coordinates.length > 0) {
       //let max = this.elevations.length > 0 ? Math.max(...this.elevations) : 1
       //let min = this.elevations.length > 0 ? Math.min(...this.elevations) : 0
-      let min = this.elevations.reduce((min, ele) => min > ele ? ele : min)
-      let max = this.elevations.reduce((max, ele) => max < ele ? ele : max)
+      let min = this.elevations.length > 0 ? this.elevations.reduce((min, ele) => min > ele ? ele : min) : 0
+      let max = this.elevations.length > 0 ? this.elevations.reduce((max, ele) => max < ele ? ele : max) : 0
       if(min === max) max++
       let data = this.coordinates.map((x, i) => {
         return [...x, this.elevations.length >= i+1 ? this.elevations[i] : Math.min(...this.elevations)]
       })
       this.polyline = Lh.hotline(data,
         {
+          className: "kkkkkk",
           weight: 3,
           //color: '#3379FF',
           outlineWidth: 0,
@@ -363,7 +366,7 @@ export class MapComponent implements OnInit {
       .on('mousedown', (e) => {
         this.bool = false
         this.drag = true
-        this.num = this.coordinates.findIndex(x => x[0] === (e as L.LeafletMouseEvent).latlng.lat && x[1] === (e as L.LeafletMouseEvent).latlng.lng)
+        this.num = this.coordinates.findIndex(x => x[0] === (e as L.LeafletMouseEvent).target._latlng.lat && x[1] === (e as L.LeafletMouseEvent).target._latlng.lng)
       })
       .on('mouseup', (e) => {
         //console.log('khk')
@@ -488,6 +491,8 @@ export class MapComponent implements OnInit {
     this.history.splice(this.historyIndex+1, 0, {
       coordinates : x,
       elevations : y,
+      center : [this.map.getCenter().lat, this.map.getCenter().lng],
+      zoom : this.map.getZoom()
     })
     this.historyIndex++
     if(this.historyIndex !== 0) {
@@ -504,6 +509,10 @@ export class MapComponent implements OnInit {
     this.historyIndex--
     this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
     this.elevations = this.history[this.historyIndex].elevations.slice(0)
+    this.map.setView(
+      this.history[this.historyIndex].center.slice(0),
+      this.history[this.historyIndex].zoom
+    )
     this.draw()
     this.updateChart()
     let redo = (this.redo as HTMLButtonElement)
@@ -525,6 +534,10 @@ export class MapComponent implements OnInit {
     this.historyIndex++
     this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
     this.elevations = this.history[this.historyIndex].elevations.slice(0)
+    this.map.setView(
+      this.history[this.historyIndex].center.slice(0),
+      this.history[this.historyIndex].zoom
+    )
     this.draw()
     this.updateChart()
     let redo = (this.redo as HTMLButtonElement)
@@ -541,12 +554,12 @@ export class MapComponent implements OnInit {
    * Initialisation de la map et ajout des EventListener
   **/
   private initMap(): void {
-    this.saveState()
     this.map = L.map('map', {
       center: [ 45.778480529785156, 4.8537468910217285 ],
       zoom: 16,
       zoomControl: false
     })
+    this.saveState()
     this.draw()
     //let theme = "mapbox/streets-v10"
     let theme = "amauryg/ck6ru04ol65091ipfzqurfraf"
@@ -633,8 +646,43 @@ export class MapComponent implements OnInit {
       }
     })
 
+    this.map.on("zoomend", (e) => {
+      if(e.target._zoom < 16) {
+        this.circles.forEach(circle => {
+          circle.setRadius(0)
+          circle.setStyle({
+            weight: 0
+          })
+        })
+      } else {
+        this.circles.forEach(circle => {
+          circle.setRadius(10)
+          circle.setStyle({
+            weight: 3
+          })
+        })
+      }
+    })
+
     this.undo.addEventListener('click', this.prev)
     this.redo.addEventListener('click', this.next)
+
+    this.import.addEventListener('click', () => {
+      dispatchEvent(new CustomEvent("show_import"))
+    })
+
+    document.getElementById("wand").addEventListener("click", () => {
+      document.body.classList.toggle("wand_mode")
+    })
+
+    window.addEventListener("new", (e) => {
+      this.coordinates = (e as any).detail.coordinates
+      this.elevations = (e as any).detail.elevations
+      this.draw()
+      this.map.fitBounds(this.polyline.getBounds())
+      this.updateChart()
+      this.saveState()
+    })
 
     Array.from(document.querySelectorAll("input[name='tools']"))
     .forEach((input, i, array) => {

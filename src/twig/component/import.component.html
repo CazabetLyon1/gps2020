@@ -1,0 +1,16 @@
+<div id="import_container">
+  <span>Importation</span>
+  <span>Vous pouvez importer n'importe quelle trace GPS en utilisant une des options listées ci-dessous :</span>
+  <input type="radio" id="link_method" name="method">
+  <label class="method" for="link_method">
+    <!--<span>Via un lien</span>-->
+    <input type="text" id="link" name="link" placeholder="URL" spellcheck="false" autocomplete="false" disabled>
+    <button type="button" name="send_link" id="send_link" class="send" disabled></button>
+  </label>
+  <input type="radio" id="file_method" name="method">
+  <label class="method" for="file_method">
+    <input type="file" id="file" name="file" accept=".gpx" disabled>
+    <label for="file">Choisir un fichier</label>
+    <button type="button" name="send_file" id="send_file" class="send" disabled></button>
+  </label>
+</div>

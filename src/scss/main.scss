@@ -180,12 +180,25 @@ body, html {
   height: 36px;
   border-radius: 5px;
   background: white;
-  border: 1px solid rgba(203,204,205,1);
+  border: 1px solid #6b6d6f;
+  border-radius: 50%;
   cursor: pointer;
 }
 
 #map_tools .tool:not(:last-child) {
   margin-right: 10px;
+}
+
+#map_tools input:checked + .tool::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 42px;
+  height: 42px;
+  background-color: transparent;
+  border: 1px solid #6b6d6f;
+  border-radius: 50%;
 }
 
 #map_tools .tool::before {
@@ -196,17 +209,24 @@ body, html {
   width: 36px;
   height: 36px;
   background-color: rgba(62,62,62,.5);
-  mask-size: 20px;
-  -webkit-mask-size: 20px;
+  mask-size: 18px;
+  -webkit-mask-size: 18px;
   mask-position: center;
   -webkit-mask-position: center;
   mask-repeat: no-repeat;
   -webkit-mask-repeat: no-repeat;
+  transition: -webkit-mask-size .1s ease-in-out, mask-size .1s ease-in-out;
+}
+
+#map_tools input:checked + .tool::before {
+  mask-size: 21px;
+  -webkit-mask-size: 21px;
 }
 
 #map_tools .tool:hover::before,
 #map_tools input:checked + .tool::before {
-  background-color: rgba(62,62,62,1);
+  //background-color: rgba(62,62,62,1);
+  background: linear-gradient(to right, #0043c4, #00dde9);
 }
 
 #map_tools .tool[for="move_map"]::before {
@@ -232,4 +252,25 @@ body, html {
 #map_tools .tool[for="lasso"]::before {
   mask-image: url("/img/lasso.png");
   -webkit-mask-image: url("/img/lasso.png");
+}
+
+#map_tools .tool[for="wand"]::before {
+  mask-image: url("/img/wand.png");
+  -webkit-mask-image: url("/img/wand.png");
+}
+
+body.blur > *:not(import-module) {
+  filter: blur(5px);
+  -webkit-filter: blur(5px);
+  transition: .5s ease-in-out;
+}
+
+body.wand_mode #coordinates,
+body.wand_mode #bottom-left,
+body.wand_mode apex-chart,
+body.wand_mode #map_tools > *:not(label[for="wand"]),
+body.wand_mode .leaflet-control-container,
+body.wand_mode .leaflet-map-pane > *:not(.leaflet-overlay-pane) {
+  transition: 0.5s ease-in-out;
+  filter: blur(5px);
 }
