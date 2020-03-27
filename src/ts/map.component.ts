@@ -349,13 +349,13 @@ export class MapComponent implements OnInit {
     this.circles.push(L.circle([e.latlng.lat, e.latlng.lng],
       {
         className: "grab-cursor",
-        radius: 10,
+        radius: this.map.getZoom() < 16 ? 0 : 10,
         fillColor: '#34616C',
         fillOpacity:1,
         //stroke: false
         stroke: true,
         color: 'white',
-        weight: 3
+        weight: this.map.getZoom() < 16 ? 0 : 3
       })
       .addTo(this.map)
       .on('mouseover', (e) => {
@@ -673,6 +673,57 @@ export class MapComponent implements OnInit {
 
     document.getElementById("wand").addEventListener("click", () => {
       document.body.classList.toggle("wand_mode")
+      if(document.body.classList.contains("wand_mode")) {
+        let save = this.coordinates
+        let saveE = this.elevations
+        let distances = save.reduce((x, point) => {
+          return {
+            last: point,
+            distances: x.last
+                       ? [
+                         ...x.distances,
+                         this.distance(x.last[0], x.last[1], point[0], point[1])
+                       ]
+                       : []
+          }
+        }, {
+          last: null,
+          distances: []
+        }).distances
+        let total = distances.reduce((total, x) => total+x, 0)
+        let min = Math.min(...distances)
+        let max = Math.max(...distances)
+        let range = document.createElement("input")
+            range.type = "range"
+            range.name = "tolerance"
+            range.id = "tolerance"
+            range.min = String(/*min*/0)
+            range.max = String(total)
+            range.step = String((total-min)/100)
+            range.value = String(/*min*/0)
+            range.addEventListener("input", (e) => {
+              let value = (e as any).target.value
+              let new_coordinates = distances.reduce((o, distance, i) => {
+                return {
+                  sum: o.sum >= value ? 0 : o.sum + distance,
+                  coordinates : o.sum >= value || i+1 === distances.length ? [...o.coordinates, save[i+1]] : o.coordinates,
+                  elevations : o.sum >= value || i+1 === distances.length ? [...o.elevations, saveE[i]] : o.elevations
+                }
+              }, {
+                sum : 0,
+                coordinates : [save[0]],
+                elevations : [saveE[0]]
+              })
+              this.coordinates = new_coordinates.coordinates
+              this.elevations = new_coordinates.elevations
+              this.draw()
+            })
+        document.body.appendChild(range)
+      } else {
+        document.getElementById("tolerance").remove()
+        this.saveState()
+        this.updateChart()
+      }
     })
 
     window.addEventListener("new", (e) => {

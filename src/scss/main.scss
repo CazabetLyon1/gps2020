@@ -56,6 +56,7 @@ body, html {
   overflow: hidden;
   line-height: 20px;
   margin-left: 10px;
+  display: none;
 }
 
 /*#coordinates span::before {
@@ -132,8 +133,17 @@ body, html {
 }
 
 #coordinates button#undo,
-#coordinates button#redo {
+#coordinates button#redo,
+#coordinates button#zoomin,
+#coordinates button#zoomout,
+#coordinates button#compass {
   border-radius: 50%;
+}
+
+#coordinates button#zoomin::before,
+#coordinates button#zoomout::before {
+  mask-size: 15px;
+  -webkit-mask-size: 15px;
 }
 
 #coordinates button#undo::before,
@@ -144,12 +154,31 @@ body, html {
   -webkit-mask-position: 9px center;
 }
 
-#coordinates button#redo {
+/*#coordinates button#redo {
   margin-left: 10px;
+}*/
+
+#coordinates button {
+  margin: 0 5px;
 }
 
 #coordinates button#redo::before {
   transform: scale(-1, 1);
+}
+
+#coordinates button#zoomin::before {
+  mask-image: url("/img/plus.png");
+  -webkit-mask-image: url("/img/plus.png");
+}
+
+#coordinates button#zoomout::before {
+  mask-image: url("/img/minus.png");
+  -webkit-mask-image: url("/img/minus.png");
+}
+
+#coordinates button#compass::before {
+  mask-image: url("/img/compass.png");
+  -webkit-mask-image: url("/img/compass.png");
 }
 
 #bottom-left button#import::before {
@@ -257,6 +286,44 @@ body, html {
 #map_tools .tool[for="wand"]::before {
   mask-image: url("/img/wand.png");
   -webkit-mask-image: url("/img/wand.png");
+}
+
+#tolerance {
+  position: absolute;
+  top: 100px;
+  right: 40px;
+  //transform: translate(-50%, 50%);
+  z-index: 10000;
+  outline: 0;
+  border: 0;
+  width: 200px;
+  height: 20px;
+  overflow: hidden;
+  -webkit-appearance: none;
+  background-color: red;
+  border-radius: 300px;
+  border: 2px solid black;
+}
+
+#tolerance::-webkit-slider-runnable-track {
+  height: 20px;
+  -webkit-appearance: none;
+  background-color: white;
+  //border: 5px solid green;
+}
+
+#tolerance::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  background-color: black;
+  position: relative;
+  -webkit-appearance: none;
+  border-radius: 50%;
+}
+
+#tolerance:active::-webkit-slider-thumb {
+  background-color: red;
 }
 
 body.blur > *:not(import-module, notification-module) {
