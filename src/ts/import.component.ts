@@ -61,6 +61,7 @@ export class ImportComponent implements OnInit {
           this.parseDocument(doc)
         }).catch(error => {
           console.log(error)
+          dispatchEvent(new CustomEvent("notification"))
         })
       }
     })

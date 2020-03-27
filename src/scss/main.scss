@@ -259,7 +259,7 @@ body, html {
   -webkit-mask-image: url("/img/wand.png");
 }
 
-body.blur > *:not(import-module) {
+body.blur > *:not(import-module, notification-module) {
   filter: blur(5px);
   -webkit-filter: blur(5px);
   transition: .5s ease-in-out;
