@@ -37,13 +37,15 @@ export class ChartElevationComponent {
       series: [
         {
           name: "Altitude",
-          data: [0, 0]
+          //data: [0, 0]
+          data: [12, 30, 21, 12, 5, 30, 23]
         }
       ],
       chart: {
         id: "elevation-chart",
         height: 100,
-          type: "area",
+        parentHeightOffset: 0,
+        type: "area",
         zoom: {
           enabled: false
         },
@@ -67,6 +69,17 @@ export class ChartElevationComponent {
         }
       },
       fill: {
+        type: "gradient",
+        gradient: {
+          shade: "dark",
+          gradientToColors: ["#FDD835"],
+          shadeIntensity: 1,
+          type: "horizontal",
+          opacityFrom: 1,
+          opacityTo: 1,
+          stops: [0, 100],
+          //colorStops: [4, 4]
+        }
         //colors: ['red'],
         //type: "gradient",
         /*gradient: {
@@ -89,8 +102,8 @@ export class ChartElevationComponent {
       },
       stroke: {
         curve: "smooth",
-        width: 1,
-        colors: ['#3379FF']
+        width: 3,
+        //colors: ['#3379FF']
       },
       grid: {
         show: false,
@@ -106,6 +119,7 @@ export class ChartElevationComponent {
         }
       },
       yaxis: {
+        show: false,
         floating: true,
         axisTicks: {
           show: false

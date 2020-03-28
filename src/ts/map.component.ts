@@ -432,6 +432,7 @@ export class MapComponent implements OnInit {
       this.drawPolyline()
       this.saveState()
       this.updateChart()
+      this.updateInformations()
     })
     this.draw()
   }
@@ -447,6 +448,7 @@ export class MapComponent implements OnInit {
     this.elevations.splice(idx, 1)
     this.saveState()
     this.updateChart()
+    this.updateInformations()
     this.draw()
   }
 
@@ -464,6 +466,7 @@ export class MapComponent implements OnInit {
         this.drawPolyline()
         this.saveState()
         this.updateChart()
+        this.updateInformations()
       })
       this.addMarker(e)
       this.drag = true
@@ -515,6 +518,7 @@ export class MapComponent implements OnInit {
     )
     this.draw()
     this.updateChart()
+    this.updateInformations()
     let redo = (this.redo as HTMLButtonElement)
     if(redo.disabled) {
         redo.disabled = false
@@ -540,6 +544,7 @@ export class MapComponent implements OnInit {
     )
     this.draw()
     this.updateChart()
+    this.updateInformations()
     let redo = (this.redo as HTMLButtonElement)
     if(this.historyIndex+1 === this.history.length) {
         redo.disabled = true
@@ -550,6 +555,22 @@ export class MapComponent implements OnInit {
     }
   }
 
+  private updateInformations = (): void => {
+    document.getElementById("points").textContent = this.coordinates.length
+    document.getElementById("length").textContent = this.coordinates.reduce((o, point) => {
+      return {
+        last: point,
+        sum: o.last ? o.sum + this.distance(o.last[0], o.last[1], point[0], point[1]) : 0
+      }
+    }, {
+      last: null,
+      sum: 0
+    }).sum.toFixed(2)
+    document.getElementById("max").textContent = String(Math.max(...this.elevations).toFixed(2))
+    document.getElementById("min").textContent = String(Math.min(...this.elevations).toFixed(2))
+    document.getElementById("moy").textContent = String(this.elevations.reduce((moy, ele) => (moy+ele)/2, this.elevations[0]).toFixed(2))
+  }
+
   /**
    * Initialisation de la map et ajout des EventListener
   **/
@@ -558,7 +579,9 @@ export class MapComponent implements OnInit {
       center: [ 45.778480529785156, 4.8537468910217285 ],
       zoom: 16,
       zoomControl: false
-    })
+    }) ;
+    (document.getElementById("zoom") as HTMLInputElement).value = "16"
+    document.getElementById("zoom").className = "level-16"
     this.saveState()
     this.draw()
     //let theme = "mapbox/streets-v10"
@@ -587,9 +610,9 @@ export class MapComponent implements OnInit {
       console.log(e)
     })*/
 
-    L.control.zoom({
+    /*L.control.zoom({
       position: 'bottomright'
-    }).addTo(this.map)
+    }).addTo(this.map)*/
 
     this.map.on('click', this.zoom)
     this.map.on('mousedown', this.add)
@@ -604,6 +627,7 @@ export class MapComponent implements OnInit {
           this.elevations.splice(idx, 1)
           this.saveState()
           this.updateChart()
+          this.updateInformations()
           this.draw()
         })
         this.map.removeLayer(this.lasso)
@@ -629,6 +653,7 @@ export class MapComponent implements OnInit {
           this.fusion = null
           this.saveState()
           this.updateChart()
+          this.updateInformations()
           this.draw()
           this.num = null
           this.coordinateToRequest = null
@@ -638,6 +663,7 @@ export class MapComponent implements OnInit {
             this.drawPolyline()
             this.saveState()
             this.updateChart()
+            this.updateInformations()
             this.num = null
             this.coordinateToRequest = null
           })
@@ -667,8 +693,18 @@ export class MapComponent implements OnInit {
     this.undo.addEventListener('click', this.prev)
     this.redo.addEventListener('click', this.next)
 
+    document.getElementById("zoom").addEventListener("input", (e) => {
+      let zoom = (e as any).target.value ;
+      (e.target as HTMLElement).className = "level-" + zoom
+      this.map.setZoom(zoom)
+    })
+
     this.import.addEventListener('click', () => {
       dispatchEvent(new CustomEvent("show_import"))
+    })
+
+    document.getElementById("hide_details").addEventListener("change", (e) => {
+      console.log(e)
     })
 
     document.getElementById("wand").addEventListener("click", () => {
@@ -723,6 +759,7 @@ export class MapComponent implements OnInit {
         document.getElementById("tolerance").remove()
         this.saveState()
         this.updateChart()
+        this.updateInformations()
       }
     })
 
@@ -732,6 +769,7 @@ export class MapComponent implements OnInit {
       this.draw()
       this.map.fitBounds(this.polyline.getBounds())
       this.updateChart()
+      this.updateInformations()
       this.saveState()
     })
 

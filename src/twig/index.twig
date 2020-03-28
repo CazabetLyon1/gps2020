@@ -3,20 +3,19 @@
 {% block page %}
 <leaflet-map></leaflet-map>
 <notification-module></notification-module>
-<apex-chart></apex-chart>
 <div id="map_tools">
   <input type="radio" id="move_map" name="tools" checked>
-  <label class="tool" for="move_map"></label>
+  <label class="tool" for="move_map"><span class="tooltip">Déplacer</span></label>
   <input type="radio" id="add" name="tools">
-  <label class="tool" for="add"></label>
+  <label class="tool" for="add"><span class="tooltip">Ajouter</span></label>
   <input type="radio" id="delete" name="tools">
-  <label class="tool" for="delete"></label>
+  <label class="tool" for="delete"><span class="tooltip">Supprimer</span></label>
   <input type="radio" id="move" name="tools">
-  <label class="tool" for="move"></label>
+  <label class="tool" for="move"><span class="tooltip">Déplacer</span></label>
   <input type="radio" id="lasso" name="tools">
-  <label class="tool" for="lasso"></label>
+  <label class="tool" for="lasso"><span class="tooltip">Lasso</span></label>
   <input type="radio" id="wand" name="tools">
-  <label class="tool" for="wand"></label>
+  <label class="tool" for="wand"><span class="tooltip">Correcteur</span></label>
 </div>
 <div id="top-left">
   <img src="/img/map.png" alt="Logo Lifprojet">
@@ -24,15 +23,60 @@
 </div>
 <div id="coordinates">
   <button type="button" name="undo" id="undo" disabled></button>
-  <button type="button" name="zoomin" id="zoomin"></button>
+  <!--<button type="button" name="zoomin" id="zoomin"></button>-->
   <span id="lat"></span><span id="lng"></span>
-  <button type="button" name="compass" id="compass"></button>
-  <button type="button" name="zoomout" id="zoomout"></button>
+  <button type="button" name="localization" id="localization"></button>
+  <!--<button type="button" name="compass" id="compass"></button>-->
+  <!--<button type="button" name="zoomout" id="zoomout"></button>-->
   <button type="button" name="redo" id="redo" disabled></button>
 </div>
-<div id="bottom-left">
+<!--<div id="buttonss">
   <button type="button" name="import" id="import"></button>
   <button type="button" name="export" id="export"></button>
+</div>-->
+<div id="bottom-left">
+  <input type="checkbox" name="hide_details" id="hide_details" checked>
+  <label for="hide_details"></label>
+  <div>
+    <apex-chart></apex-chart>
+  </div>
+  <div>
+    <button type="button" name="lat" value="">45.6643...</button>
+    <button type="button" name="lng" value="">4.84656...</button>
+  </div>
+  <div>
+    <div>
+      <span id="points">0</span>
+      <span>Points</span>
+    </div>
+    <div>
+      <span id="length">0</span>
+      <span>km</span>
+    </div>
+  </div>
+  <div>
+    <div>
+      <span id="max">-</span>
+      <span>Max</span>
+    </div>
+    <div>
+      <span id="min">-</span>
+      <span>Min</span>
+    </div>
+    <div>
+      <span id="moy">-</span>
+      <span>Moy</span>
+    </div>
+  </div>
+  <div>
+    <button type="button" name="import" id="import">Importer</button>
+    <button type="button" name="export" id="export">Exporter</button>
+  </div>
+</div>
+<div id="bottom-right">
+  <button type="button" name="zoomout" id="zoomout"></button>
+  <input type="range" name="zoom" id="zoom" class="level-0" min="0" max="18" step="1" value="0">
+  <button type="button" name="zoomin" id="zoomin"></button>
 </div>
 <import-module></import-module>
 {% endblock %}

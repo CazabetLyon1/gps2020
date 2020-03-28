@@ -10,6 +10,7 @@ const jsonParser = bodyParser.json()
 
 app.use(express.static('dist'))
 app.use('/img', express.static('src/img'))
+app.use('/leaflet.css', express.static('node_modules/leaflet/dist/leaflet.css'))
 
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/html')
