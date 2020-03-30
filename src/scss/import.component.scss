@@ -10,28 +10,6 @@ import-module {
   z-index: 10000;
 }
 
-#progress-bar {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%) !important;
-  width: 200px;
-  height: 14px;
-  border: 2px solid black;
-  z-index: 10000;
-  background: transparent;
-  opacity: 1 !important;
-  overflow: hidden;
-  border-radius: 20px;
-}
-
-#progress-bar > div {
-  width: 0;
-  height: 100%;
-  background: linear-gradient(to right, rgb(72, 29, 207), #1be6c0);
-  transition: width .3s;
-}
-
 #import_container {
   //background: rgba(255,255,255,.8);
   width: 100%;

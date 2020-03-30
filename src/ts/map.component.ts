@@ -48,6 +48,7 @@ export class MapComponent implements OnInit {
   private redo: HTMLElement = document.getElementById("redo")
 
   private import: HTMLButtonElement = document.getElementById("import") as HTMLButtonElement
+  private export: HTMLButtonElement = document.getElementById("export") as HTMLButtonElement
 
   constructor() {}
 
@@ -699,8 +700,21 @@ export class MapComponent implements OnInit {
       this.map.setZoom(zoom)
     })
 
+    window.addEventListener("need_data", () => {
+      dispatchEvent(new CustomEvent("data", {
+        detail: {
+          coordinates: this.coordinates,
+          elevations: this.elevations
+        }
+      }))
+    })
+
     this.import.addEventListener('click', () => {
       dispatchEvent(new CustomEvent("show_import"))
+    })
+
+    this.export.addEventListener('click', () => {
+      dispatchEvent(new CustomEvent("show_export"))
     })
 
     document.getElementById("hide_details").addEventListener("change", (e) => {

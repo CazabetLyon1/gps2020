@@ -1,0 +1,201 @@
+export-module {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width:100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  display: none;
+  z-index: 10000;
+}
+
+#export_container {
+  //background: rgba(255,255,255,.8);
+  width: 100%;
+  max-width: 600px;
+  max-height: 100%;
+  margin: 0 auto;
+}
+
+#export_container > * {
+  opacity: 0;
+  transform: translateY(-40px);
+  transition: opacity .5s ease-in-out, transform .5s ease-in-out;
+}
+
+#export_container > span {
+  display: block;
+  text-align: center;
+  font-family: "Helvetica";
+  line-height: 30px;
+}
+
+#export_container > span:first-child {
+  font-size: 25px;
+  color: black;
+  margin-bottom: 10px;
+}
+
+#export_container > span:nth-child(2) {
+  font-size: 15px;
+  color: black;
+  margin-bottom: 30px;
+}
+
+#export_container input[type="radio"] {
+  display: none;
+}
+
+#export_container label.method {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  max-width: 300px;
+  width: 100%;
+  height: 80px;
+  background: rgba(255,255,255,.75);
+  border-radius: 4px;
+  margin: 20px auto;
+  border: 1px solid rgb(170,170,170);
+  padding-left: 70px;
+}
+
+#export_container input:not(:checked) + label.method {
+  cursor: pointer;
+}
+
+/*#export_container input:disabled + label.method {
+  opacity: 0.5 !important;
+}*/
+
+#export_container label.method::before {
+  content: '';
+  position: absolute;
+  top: 30px;
+  left: 25px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: rgba(170,170,170,0.2);
+}
+
+#export_container label.method::after {
+  content: '';
+  position: absolute;
+  top: 25px;
+  left: 20px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(170,170,170,0.2);
+  background: transparent;
+  transition: 0.5s ease-in-out;
+}
+
+#export_container label.method:hover::before {
+  background-color: rgba(170,170,170,1);
+}
+
+#export_container input:checked + label.method::before {
+  background-color: #008cd0;
+}
+
+#export_container label.method:hover::after {
+  border: 2px solid rgba(170,170,170,1);
+}
+
+#export_container input:checked + label.method::after {
+  border: 2px solid #0b4989;
+}
+
+#export_container label.method span {
+  font-family: "Helvetica";
+  font-size: 13px;
+  text-align: left;
+  line-height: 20px;
+  margin: 0;
+}
+
+#export_container label.method span:first-child {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+#export_container .file-link {
+  display: flex;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  height: 70px;
+  background: white;
+  border: 1px solid rgb(170,170,170);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: opacity 0.5 ease-in-out;
+}
+
+#export_container .file-link::before {
+  content: '';
+  position: absolute;
+  top: 25px;
+  left: calc(100% - 40px);
+  width: 20px;
+  height: 20px;
+  background-color: #2B2B2B;
+  mask-image: url("/img/download.png");
+  -webkit-mask-image: url("/img/download.png");
+  mask-size: 20px;
+  -webkit-mask-size: 20px;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+#export_container .file-link:hover::before {
+  background-color: #008cd0;
+}
+
+#export_container .file-link span {
+  text-decoration: none;
+  font-family: "Helvetica";
+  color: black;
+}
+
+#export_container .file-link > span:first-child {
+  width: 60px;
+  padding: 0 10px;
+  font-family: "Helvetica";
+  font-size: 17px;
+  line-height: 25px;
+  display: flex;
+  align-items: center;
+  color: rgb(112, 112, 112);
+  text-align: center;
+  font-weight: 300;
+  border-right: 1px solid rgba(170,170,170,.4);
+  margin: 10px 0;
+  margin-right: 15px;
+}
+
+#export_container .file-link > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#export_container .file-link > span:nth-child(2) > span:first-child {
+  font-size: 17px;
+  line-height: 20px;
+  margin-bottom: 5px;
+}
+
+#export_container .file-link > span:nth-child(2) > span:nth-child(2) {
+  font-size: 13px;
+  line-height: 20px;
+  color: rgb(170,170,170);
+}

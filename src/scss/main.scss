@@ -692,8 +692,8 @@ body, html {
 
 #bottom-right button {
   position: relative;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: white;
   border: 1px solid rgba(203,204,205,1);
@@ -706,13 +706,13 @@ body, html {
   position: absolute;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   background-color: rgba(100,100,100,1);
   mask-size: 8px;
   -webkit-mask-size: 8px;
-  mask-position: 5px 6px;
-  -webkit-mask-position: 5px 6px;
+  mask-position: 6px 7px;
+  -webkit-mask-position: 6px 7px;
   mask-repeat: no-repeat;
   -webkit-mask-repeat: no-repeat;
 }
@@ -727,15 +727,42 @@ body, html {
   -webkit-mask-image: url("/img/minus.png");
 }
 
-body.blur > *:not(import-module, notification-module) {
+#progress-bar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%) !important;
+  width: 200px;
+  height: 14px;
+  border: 2px solid black;
+  z-index: 10000;
+  background: transparent;
+  opacity: 1 !important;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+#progress-bar > div {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(to right, rgb(72, 29, 207), #1be6c0);
+  transition: width .3s;
+}
+
+#export_container #progress-bar > div {
+  transition: width 1s ease-in-out !important;
+}
+
+body > *:not(import-module, notification-module, export-module) {
+  transition: filter .5s ease-in-out;
+}
+
+body.blur > *:not(import-module, notification-module, export-module) {
   filter: blur(5px);
   -webkit-filter: blur(5px);
-  transition: .5s ease-in-out;
 }
 
 body.wand_mode #coordinates,
-body.wand_mode #bottom-left,
-body.wand_mode apex-chart,
 body.wand_mode #map_tools > *:not(label[for="wand"]),
 body.wand_mode .leaflet-control-container,
 body.wand_mode .leaflet-map-pane > *:not(.leaflet-overlay-pane) {

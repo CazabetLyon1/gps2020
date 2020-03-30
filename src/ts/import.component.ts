@@ -61,7 +61,12 @@ export class ImportComponent implements OnInit {
           this.parseDocument(doc)
         }).catch(error => {
           console.log(error)
-          dispatchEvent(new CustomEvent("notification"))
+          dispatchEvent(new CustomEvent("notification", {
+            detail: {
+              title: "Erreur",
+              message: "L'URL n'est pas valide"
+            }
+          }))
         })
       }
     })

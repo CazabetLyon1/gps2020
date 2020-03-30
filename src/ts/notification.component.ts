@@ -13,19 +13,19 @@ export class NotificationComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    window.addEventListener('notification', () => this.new())
+    window.addEventListener('notification', (e) => this.new((e as any).detail))
   }
 
-  private new = (): void => {
+  private new = (data): void => {
     let n = document.createElement("div")
         n.className = "notification"
     let img = document.createElement("img")
         img.src = "/img/document.png"
     let span = document.createElement("span")
     let span1 = document.createElement("span")
-        span1.textContent = "Erreur"
+        span1.textContent = data.title
     let span2 = document.createElement("span")
-        span2.textContent = "L'URL n'est pas valide"
+        span2.textContent = data.message
     span.appendChild(span1)
     span.appendChild(span2)
     let button = document.createElement("button")
