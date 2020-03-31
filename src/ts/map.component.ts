@@ -369,6 +369,8 @@ export class MapComponent implements OnInit {
         weight: this.map.getZoom() < 16 ? 0 : 3
       })
       .addTo(this.map)
+      //.setZIndex(this.circles.length)
+      //.bringToFront()
       .on('mouseover', (e) => {
         //console.log('jhkjh')
         //document.body.style.cursor = "wait"
@@ -858,38 +860,46 @@ export class MapComponent implements OnInit {
       if(document.body.classList.contains("wand_mode")) {
         let save = this.coordinates
         let saveE = this.elevations
-        let distances = save.reduce((x, point) => {
+        let steps = save.reduce((x, point) => {
+          let distance = x.last ? this.distance(x.last[0], x.last[1], point[0], point[1]) : null
           return {
             last: point,
+            sum: x.last ? x.sum + distance : 0,
             distances: x.last
                        ? [
                          ...x.distances,
-                         this.distance(x.last[0], x.last[1], point[0], point[1])
+                         distance,
+                         x.sum + distance
                        ]
                        : []
           }
         }, {
           last: null,
+          sum: 0,
           distances: []
         }).distances
-        let total = distances.reduce((total, x) => total+x, 0)
-        let min = Math.min(...distances)
-        let max = Math.max(...distances)
+        //distances.shift()
+        let distances = steps.filter((x, i) => i%2 === 0)
+        steps[0] = 0
+        steps.sort()
+        //let total = distances.reduce((total, x) => total+x, 0)
+        //let min = Math.min(...distances)
+        //let max = Math.max(...distances)
         let range = document.createElement("input")
             range.type = "range"
             range.name = "tolerance"
             range.id = "tolerance"
-            range.min = String(/*min*/0)
-            range.max = String(total)
-            range.step = String((total-min)/100)
-            range.value = String(/*min*/0)
+            range.min = "0"
+            range.max = String(steps.length-1)
+            range.step = "1"
+            range.value = "0"
             range.addEventListener("input", (e) => {
-              let value = (e as any).target.value
+              let value = steps[(e as any).target.value]
               let new_coordinates = distances.reduce((o, distance, i) => {
                 return {
                   sum: o.sum >= value ? 0 : o.sum + distance,
                   coordinates : o.sum >= value || i+1 === distances.length ? [...o.coordinates, save[i+1]] : o.coordinates,
-                  elevations : o.sum >= value || i+1 === distances.length ? [...o.elevations, saveE[i]] : o.elevations
+                  elevations : o.sum >= value || i+1 === distances.length ? [...o.elevations, saveE[i+1]] : o.elevations
                 }
               }, {
                 sum : 0,

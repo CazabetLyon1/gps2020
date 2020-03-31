@@ -61,7 +61,7 @@ export class ExportComponent implements OnInit {
                 span1.textContent = this.bytesToSize(blob.size)
             let span2 = document.createElement("span")
             let span21 = document.createElement("span")
-                span21.textContent = "Central-Park"
+                span21.textContent = "Votre fichier"
             let span22 = document.createElement("span")
                 span22.textContent = "Fichier GPX"
             span2.appendChild(span21)
@@ -74,7 +74,7 @@ export class ExportComponent implements OnInit {
               l.style.opacity = "1"
             }, {once: true})
             //a.click()
-            window.URL.revokeObjectURL(url)
+            //window.URL.revokeObjectURL(url)
           }, {once: true})
           dispatchEvent(new CustomEvent("need_data"))
         })
