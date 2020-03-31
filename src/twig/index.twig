@@ -4,15 +4,15 @@
 <leaflet-map></leaflet-map>
 <apex-chart></apex-chart>
 <div id="map_tools">
-  <input type="radio" id="move_map" name="tools" checked>
+  <input type="radio" id="move_map" name="tools" accesskey="m" checked>
   <label class="tool" for="move_map"></label>
-  <input type="radio" id="add" name="tools">
+  <input type="radio" id="add" name="tools" accesskey="a">
   <label class="tool" for="add"></label>
-  <input type="radio" id="delete" name="tools">
+  <input type="radio" id="delete" name="tools" accesskey="d">
   <label class="tool" for="delete"></label>
-  <input type="radio" id="move" name="tools">
+  <input type="radio" id="move" name="tools" accesskey="f">
   <label class="tool" for="move"></label>
-  <input type="radio" id="lasso" name="tools">
+  <input type="radio" id="lasso" name="tools" accesskey="l">
   <label class="tool" for="lasso"></label>
 </div>
 <div id="top-left">
@@ -20,12 +20,12 @@
   <span>L<span>ifprojet</span></span>
 </div>
 <div id="coordinates">
-  <button type="button" name="undo" id="undo" disabled></button>
+  <button type="button" name="undo" id="undo" accesskey="z" disabled></button>
   <span id="lat"></span><span id="lng"></span>
-  <button type="button" name="redo" id="redo" disabled></button>
+  <button type="button" name="redo" id="redo" accesskey="y" disabled></button>
 </div>
 <div id="bottom-left">
-  <button type="button" name="import" id="import"></button>
-  <button type="button" name="export" id="export"></button>
+  <button type="button" name="import" id="import" accesskey="i"></button>
+  <button type="button" name="export" id="export" accesskey="e"></button>
 </div>
 {% endblock %}
