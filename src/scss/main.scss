@@ -214,6 +214,11 @@ body, html {
   -webkit-mask-image: url("/img/move2.png");
 }
 
+#map_tools .tool[for="apropo"]::before {
+  mask-image: url("/img/apropo.png");
+  -webkit-mask-image: url("/img/apropo.png");
+}
+
 #map_tools .tool[for="add"]::before {
   mask-image: url("/img/add.png");
   -webkit-mask-image: url("/img/add.png");

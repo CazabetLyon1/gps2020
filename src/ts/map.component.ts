@@ -43,6 +43,7 @@ export class MapComponent implements OnInit {
   private toAdd
   private coordinateToRequest
   private fusion = null
+  private apropo
 
   private undo: HTMLElement = document.getElementById("undo")
   private redo: HTMLElement = document.getElementById("redo")
@@ -180,6 +181,14 @@ export class MapComponent implements OnInit {
       })
     })
   }
+
+  /**
+   * Calculer la distance entre deux points en KM
+   * 
+   * TODO 'mahdi'
+   * 
+  **/
+
 
   /**
    * L'outil lasso
