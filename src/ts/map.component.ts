@@ -138,8 +138,10 @@ export class MapComponent implements OnInit {
           outlineWidth: 0,
           //outlineColor: "black",
           palette: {
-            0 : "hsl(219, 100%, 60%)",
-            1 : "hsl(219, 100%, 30%)"
+            /*0 : "hsl(219, 100%, 60%)",
+            1 : "hsl(219, 100%, 30%)"*/
+            0 : "#00c6fb",
+            1 : "#005bea"
           },
           min: min,
           max: max
@@ -272,9 +274,17 @@ export class MapComponent implements OnInit {
    * @param {LeafletEvent}
   **/
   private move = (e): void => {
-    if (this.toolID() === 0) {
-      document.getElementById("lat").textContent = e.latlng.lat
-      document.getElementById("lng").textContent = e.latlng.lng
+    if(!this.point || (this.point && this.drag && this.point === this.num)) {
+      const lat = document.getElementById("lat") as HTMLButtonElement
+      const lng = document.getElementById("lng") as HTMLButtonElement
+      lat.value = e.latlng.lat ;
+      lng.value = e.latlng.lng ;
+      lat.textContent = String(e.latlng.lat).substring(0, 7) + "..."
+      lng.textContent = String(e.latlng.lng).substring(0, 7) + "..."
+      if(!this.point) {
+        lat.classList.remove("highlight")
+        lng.classList.remove("highlight")
+      }
       this.map.dragging.enable()
     }
     if([1,2,3,4].includes(this.toolID())) {
@@ -350,7 +360,7 @@ export class MapComponent implements OnInit {
     this.circles.push(L.circle([e.latlng.lat, e.latlng.lng],
       {
         className: "grab-cursor",
-        radius: this.map.getZoom() < 16 ? 0 : 10,
+        radius: this.map.getZoom() < 16 ? 0 : (this.circles.length === this.point ? 15 : 10),
         fillColor: '#34616C',
         fillOpacity:1,
         //stroke: false
@@ -369,19 +379,22 @@ export class MapComponent implements OnInit {
         this.drag = true
         this.num = this.coordinates.findIndex(x => x[0] === (e as L.LeafletMouseEvent).target._latlng.lat && x[1] === (e as L.LeafletMouseEvent).target._latlng.lng)
       })
+      /*.on('mousemove', (e) => {
+        this.move(e)
+      })*/
       .on('mouseup', (e) => {
         //console.log('khk')
       })
       .on('mouseover', (e) => {
         //console.log(e.target)
-        if(this.toolID() != 0) {
+        if(this.toolID() != 0 && this.circles[this.point] !== e.target) {
           e.target.setRadius(15)
         }
         e.target._path.classList.add("kjkh")
       })
       .on('mouseout', (e) => {
         //console.log('mouseout')
-        if(e.target !== this.point) {
+        if(e.target !== this.circles[this.point]) {
           e.target.setRadius(10)
         }
       })
@@ -390,19 +403,53 @@ export class MapComponent implements OnInit {
           this.delete(e)
         } else if(this.toolID() === 1) {
           L.DomEvent.stop(e)
-          if(this.point) {
+          /*if(this.point) {
             this.point.setRadius(10)
-          }
-          document.getElementById("lat").textContent = e.target._latlng.lat
+          }*/
+          /*document.getElementById("lat").textContent = e.target._latlng.lat
           document.getElementById("lat").style.color = "#34616C"
           document.getElementById("lng").textContent = e.target._latlng.lng
-          document.getElementById("lng").style.color = "#34616C"
-          this.point = e.target
-          e.target.setRadius(15)
+          document.getElementById("lng").style.color = "#34616C"*/
+          this.circles[this.point] === e.target ? this.unselectMarker() : this.selectMarker(e.target)
         }
       }))
       //this.circles[this.circles.length-1].setZIndex(this.circles.length)
       //this.circles[this.circles.length-1].bringToFront()
+  }
+
+  private unselectMarker = (): void => {
+    this.circles[this.point].setRadius(10)
+    this.point = null
+    const moy = document.getElementById("moy")
+          moy.classList.remove("highlight")
+          moy.textContent = String(this.elevations.reduce((moy, ele) => (moy+ele)/2, this.elevations[0]).toFixed(2))
+          moy.nextElementSibling.textContent = "Moy"
+    const lat = document.getElementById("lat") as HTMLButtonElement
+          lat.classList.remove("highlight")
+    const lng = document.getElementById("lng") as HTMLButtonElement
+          lng.classList.remove("highlight")
+  }
+
+  private selectMarker = (marker): void => {
+    if(this.point) this.unselectMarker()
+    const index = this.circles.indexOf(marker)
+    this.point = index
+    marker.setRadius(15)
+    const moy = document.getElementById("moy")
+          moy.classList.add("highlight")
+          moy.textContent = this.elevations[index]
+          moy.nextElementSibling.textContent = "Val"
+
+    const lat = document.getElementById("lat") as HTMLButtonElement
+          lat.value = this.coordinates[index][0]
+          lat.textContent = String(this.coordinates[index][0]).substring(0, 7) + "..."
+          lat.classList.add("highlight")
+    const lng = document.getElementById("lng") as HTMLButtonElement
+          lng.value = this.coordinates[index][1]
+          lng.textContent = String(this.coordinates[index][1]).substring(0, 7) + "..."
+          lng.classList.add("highlight")
+
+
   }
 
   /*private addShortcut = (): void => {
@@ -430,6 +477,7 @@ export class MapComponent implements OnInit {
     this.coordinates.splice(idx, 0, [e.latlng.lat, e.latlng.lng])
     this.getElevation(e).then(ele => {
       this.elevations.splice(idx, 0, ele)
+      if(this.point && idx < this.point) this.point++
       this.drawPolyline()
       this.saveState()
       this.updateChart()
@@ -447,6 +495,8 @@ export class MapComponent implements OnInit {
     let idx = this.circles.findIndex(x => x === e.target)
     this.coordinates.splice(idx, 1)
     this.elevations.splice(idx, 1)
+    if(this.point && idx < this.point) this.point--
+    if(this.point && idx === this.point) this.point = null
     this.saveState()
     this.updateChart()
     this.updateInformations()
@@ -567,9 +617,13 @@ export class MapComponent implements OnInit {
       last: null,
       sum: 0
     }).sum.toFixed(2)
-    document.getElementById("max").textContent = String(Math.max(...this.elevations).toFixed(2))
-    document.getElementById("min").textContent = String(Math.min(...this.elevations).toFixed(2))
-    document.getElementById("moy").textContent = String(this.elevations.reduce((moy, ele) => (moy+ele)/2, this.elevations[0]).toFixed(2))
+    document.getElementById("max").textContent = this.elevations.length ? String(Math.max(...this.elevations).toFixed(2)) : "-"
+    document.getElementById("min").textContent = this.elevations.length ? String(Math.min(...this.elevations).toFixed(2)) : "-"
+    if(!this.point) {
+      document.getElementById("moy").textContent = this.elevations.length ? String(this.elevations.reduce((moy, ele) => (moy+ele)/2, this.elevations[0]).toFixed(2)) : "-"
+      document.getElementById("moy").classList.remove("highlight")
+      document.getElementById("moy").nextElementSibling.textContent = "Moy"
+    }
   }
 
   /**
@@ -623,7 +677,7 @@ export class MapComponent implements OnInit {
       if(this.toAdd) {
         //this.addShortcut()
         this.toAdd.forEach(idx => {
-          console.log('remove',idx)
+          //console.log('remove',idx)
           this.coordinates.splice(idx, 1)
           this.elevations.splice(idx, 1)
           this.saveState()
@@ -639,12 +693,12 @@ export class MapComponent implements OnInit {
     this.map.on('mousedown', () => {
       this.drag = true
     })
-    this.map.on('click', () => {
+    /*this.map.on('click', () => {
       if(this.point) {
         this.point.setRadius(10)
         this.point = null
       }
-    })
+    })*/
     this.map.on('mouseup', () => {
       this.drag = false
       if(this.toolID() === 3) {
@@ -661,6 +715,7 @@ export class MapComponent implements OnInit {
         } else {
           this.getElevation(this.coordinateToRequest).then(ele => {
             this.elevations[this.num] = ele
+            if(this.point && this.point === this.num) document.getElementById("moy").textContent = ele
             this.drawPolyline()
             this.saveState()
             this.updateChart()
@@ -694,10 +749,73 @@ export class MapComponent implements OnInit {
     this.undo.addEventListener('click', this.prev)
     this.redo.addEventListener('click', this.next)
 
+    Array.from(document.querySelectorAll(".tooltip")).forEach(tooltip => {
+      tooltip.addEventListener("mouseenter", (e) => {
+        tooltip.parentElement.dispatchEvent(new Event("mouseleave"))
+      }, true)
+      /*tooltip.addEventListener("mouseleave", (e) => {
+
+      }, true)*/
+    })
+
+    Array.from(document.querySelectorAll(".tool")).forEach(tool => {
+      tool.addEventListener("mouseenter", (e) => {
+        if(!(tool.previousElementSibling as HTMLInputElement).disabled) (tool.children[0] as HTMLElement).classList.add("hover")
+      })
+      tool.addEventListener("mouseleave", (e) => {
+        (tool.children[0] as HTMLElement).classList.remove("hover")
+      })
+    })
+
+    Array.from(document.querySelectorAll("#lat, #lng")).forEach(button => {
+      button.addEventListener("click", (e) => {
+        console.log((e.target as HTMLButtonElement).value)
+        const el = document.createElement("textarea")
+              el.value = String((e.target as HTMLButtonElement).value)
+              el.setAttribute("readonly", "")
+              //el.style.display = "none"
+              el.style.position = "absolute"
+              el.style.left = "-9999px"
+        document.body.appendChild(el)
+        const sel = document.getSelection().rangeCount > 0
+                  ? document.getSelection().getRangeAt(0)
+                  : false
+        el.select()
+        document.execCommand("copy")
+        document.body.removeChild(el)
+        if(sel) {
+          document.getSelection().removeAllRanges()
+          document.getSelection().addRange(sel)
+        }
+        dispatchEvent(new CustomEvent("notification", {
+          detail: {
+            title: "Succès",
+            message: "Enregistrée dans le presse-papier."
+          }
+        }))
+      })
+    })
+
     document.getElementById("zoom").addEventListener("input", (e) => {
       let zoom = (e as any).target.value ;
       (e.target as HTMLElement).className = "level-" + zoom
       this.map.setZoom(zoom)
+    })
+
+    Array.from(document.querySelectorAll("#zoomin, #zoomout")).forEach(button => {
+      button.addEventListener("click", () => {
+        let zoom = this.map.getZoom() + (button.id === "zoomin" ? 1 : -1)
+        const input = document.getElementById("zoom") as HTMLInputElement
+        input.value = zoom
+        input.dispatchEvent(new Event("input"))
+      })
+    })
+
+    this.map.on("zoomend", () => {
+      const zoom = document.getElementById("zoom") as HTMLInputElement
+      const z = this.map.getZoom()
+      zoom.className = "level-" + z
+      zoom.value = z
     })
 
     window.addEventListener("need_data", () => {
@@ -717,12 +835,26 @@ export class MapComponent implements OnInit {
       dispatchEvent(new CustomEvent("show_export"))
     })
 
+    document.getElementById("localization").addEventListener("click", () => {
+      if("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(position => {
+          this.map.setView([position.coords.latitude, position.coords.longitude])
+          this.saveState()
+        })
+      } else {
+
+      }
+    })
+
     document.getElementById("hide_details").addEventListener("change", (e) => {
       console.log(e)
     })
 
     document.getElementById("wand").addEventListener("click", () => {
       document.body.classList.toggle("wand_mode")
+      Array.from(document.querySelectorAll("input[name='tools']:not(:last-of-type)")).forEach(input => {
+        (input as HTMLInputElement).disabled = !(input as HTMLInputElement).disabled
+      })
       if(document.body.classList.contains("wand_mode")) {
         let save = this.coordinates
         let saveE = this.elevations

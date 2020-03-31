@@ -37,8 +37,8 @@ export class ChartElevationComponent {
       series: [
         {
           name: "Altitude",
-          //data: [0, 0]
-          data: [12, 30, 21, 12, 5, 30, 23]
+          data: []
+          //data: [12, 30, 21, 12, 5, 30, 23]
         }
       ],
       chart: {
@@ -55,7 +55,7 @@ export class ChartElevationComponent {
       },
       tooltip: {
         followCursor: false,
-        enabled: true,
+        enabled: false,
         marker: {
           show: false
         },

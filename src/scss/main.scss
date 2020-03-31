@@ -5,6 +5,10 @@ body, html {
   //min-height: 100vh;
 }
 
+button {
+  outline: none;
+}
+
 #top-left {
   display: flex;
   position: absolute;
@@ -268,9 +272,9 @@ body, html {
   transition: opacity .3s linear;
 }
 
-#map_tools .tool:hover .tooltip,
-#map_tools .tool:hover .tooltip::before,
-#map_tools .tool:hover .tooltip::after {
+#map_tools .tool .tooltip.hover,
+#map_tools .tool .tooltip.hover::before,
+#map_tools .tool .tooltip.hover::after {
   opacity: 1;
 }
 
@@ -423,7 +427,9 @@ body, html {
   overflow: hidden;
 }
 
-#bottom-left input:not(:checked) ~ div:not(:first-of-type, :last-child) {
+#bottom-left input:not(:checked) ~ div:nth-of-type(2),
+#bottom-left input:not(:checked) ~ div:nth-of-type(3),
+#bottom-left input:not(:checked) ~ div:nth-of-type(4) {
   height: 0;
   border-bottom: 1px solid transparent;
 }
@@ -467,6 +473,7 @@ body, html {
   overflow: hidden;
   letter-spacing: 0.07em;
   transition: 0.5s ease-in-out;
+  cursor: pointer;
 }
 
 #bottom-left > div:nth-of-type(2) button:first-child {
@@ -506,6 +513,10 @@ body, html {
 #bottom-left > div > div span:first-child {
   font-size: 20px;
   margin-top: 5px;
+}
+
+#bottom-left > div:nth-of-type(4) > div span:first-child {
+  font-size: 16px;
 }
 
 #bottom-left > div > div span:nth-child(2) {
@@ -554,6 +565,12 @@ body, html {
 
 #bottom-left div:last-child button#export::before {
   transform: scale(1,-1);
+}
+
+#bottom-left #moy.highlight,
+#bottom-left #lat.highlight,
+#bottom-left #lng.highlight {
+  color: #3379FF;
 }
 
 #bottom-right {
@@ -711,8 +728,8 @@ body, html {
   background-color: rgba(100,100,100,1);
   mask-size: 8px;
   -webkit-mask-size: 8px;
-  mask-position: 6px 7px;
-  -webkit-mask-position: 6px 7px;
+  mask-position: 7px 8px;
+  -webkit-mask-position: 7px 8px;
   mask-repeat: no-repeat;
   -webkit-mask-repeat: no-repeat;
 }
@@ -753,19 +770,42 @@ body, html {
   transition: width 1s ease-in-out !important;
 }
 
-body > *:not(import-module, notification-module, export-module) {
-  transition: filter .5s ease-in-out;
+/*body > *:not(import-module, notification-module, export-module) {
+  transition: filter .5s ease-in-out !important;
 }
 
 body.blur > *:not(import-module, notification-module, export-module) {
-  filter: blur(5px);
-  -webkit-filter: blur(5px);
+  filter: blur(5px) !important;
+  -webkit-filter: blur(5px) !important;
+}*/
+
+body.blur #map,
+body #top-left,
+body #coordinates,
+body #map_tools,
+body #bottom-right,
+body #bottom-left {
+  transition: filter .5s ease-in-out !important;
+}
+
+body.blur #map,
+body.blur #top-left,
+body.blur #coordinates,
+body.blur #map_tools,
+body.blur #bottom-right,
+body.blur #bottom-left {
+  filter: blur(5px) !important;
+  -webkit-filter: blur(5px) !important;
 }
 
 body.wand_mode #coordinates,
-body.wand_mode #map_tools > *:not(label[for="wand"]),
+body.wand_mode #map_tools label[for="move_map"],
+body.wand_mode #map_tools label[for="add"],
+body.wand_mode #map_tools label[for="delete"],
+body.wand_mode #map_tools label[for="move"],
+body.wand_mode #map_tools label[for="lasso"],
 body.wand_mode .leaflet-control-container,
-body.wand_mode .leaflet-map-pane > *:not(.leaflet-overlay-pane) {
+body.wand_mode .leaflet-map-pane .leaflet-tile-pane {
   transition: 0.5s ease-in-out;
   filter: blur(5px);
 }
