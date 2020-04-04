@@ -5,11 +5,16 @@
     <!--<link rel="stylesheet" href="https://unpkg.com/mapbox-gl@1.7.0/dist/mapbox-gl.css"/>-->
     <link rel="stylesheet" href="/leaflet.css"/>
     <meta charset='utf-8'/>
+    <meta name="author" content="Guyonnet Amaury">
+    <meta name="description" content="Plateforme de visualisation et d'édition d'itinéraires GPS.">
+    <meta name="keywords" content="trace,GPS,GPX,itinéraire">
     <meta name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no'>
 		<link rel='icon' type='image/png' href='/img/map.png'/>
 		<title>Lifprojet GPS</title>
 	</head>
 	<body>
-      {% block page %}{% endblock %}
+      <main>
+        {% block page %}{% endblock %}
+      </main>
 	</body>
 </html>
