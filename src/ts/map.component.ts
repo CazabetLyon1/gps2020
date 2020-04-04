@@ -648,6 +648,7 @@ export class MapComponent implements OnInit {
     let mapbox = `https://api.mapbox.com/styles/v1/${theme}/tiles/256/{z}/{x}/{y}?access_token=${token}`
     const tiles = L.tileLayer(mapbox, {
       useCache: true,
+      cacheMaxAge: 86400000,
       crossOrigin: true,
       maxZoom: 19,
       detectRetina: true,

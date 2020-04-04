@@ -6,6 +6,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 //const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 const FilterWarningsPlugin = require('webpack-filter-warnings-plugin')
 //const CopyPlugin = require('copy-webpack-plugin')
+const WorkboxPlugin = require('workbox-webpack-plugin')
 
 module.exports = {
   entry: {
@@ -120,7 +121,11 @@ module.exports = {
     new webpack.NoEmitOnErrorsPlugin(),
     new FilterWarningsPlugin({
       exclude: [/System.import/, /Critical dependency/]
-    })
+    }),
+    new WorkboxPlugin.GenerateSW({
+      clientsClaim: true,
+      skipWaiting: true,
+    }),
     /*new webpack.ContextReplacementPlugin(
       /\@angular(\\|\/)core(\\|\/)fesm5/,
       path.join(__dirname, './dist'),
