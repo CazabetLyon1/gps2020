@@ -751,6 +751,60 @@ export class MapComponent implements OnInit {
     this.undo.addEventListener('click', this.prev)
     this.redo.addEventListener('click', this.next)
 
+    document.getElementById("help-flex").addEventListener("click", (e) => {
+      e.stopPropagation()
+    })
+
+    document.getElementById("help").addEventListener("click", () => {
+      document.body.classList.add("blur") ;
+      document.getElementById("help_container").style.zIndex = "10000"
+      document.body.addEventListener("transitionend", () => {
+        document.getElementById("gif").style.opacity = "1"
+        Array.from(document.querySelectorAll("input[name='help'] + label")).forEach((label, i) => {
+          setTimeout(() => {
+            (label as HTMLElement).style.opacity = "1" ;
+            (label as HTMLElement).style.transform = "translateY(0px)" ;
+          }, i * 100) ;
+        })
+      }, {once: true})
+    })
+
+    document.getElementById("help_container").addEventListener("click", () => {
+      document.getElementById("gif").style.opacity = "0"
+      Array.from(document.querySelectorAll("input[name='help'] + label")).reverse().forEach((label, i, array) => {
+        if(i+1 === array.length) {
+          label.addEventListener("transitionend", () => {
+            document.body.addEventListener("transitionend", () => {
+              document.getElementById("help_container").style.zIndex = "-1"
+            }, {once: true})
+            document.body.classList.remove("blur")
+          }, {once: true})
+        }
+        setTimeout(() => {
+          (label as HTMLElement).style.opacity = "0" ;
+          (label as HTMLElement).style.transform = "translateY(70px)" ;
+        }, i * 100) ;
+      })
+    })
+
+    document.getElementById("gif").addEventListener("click", (e) => {
+      const gif = e.target as HTMLElement
+            gif.classList.toggle("centered")
+      document.getElementById("help_container").classList.toggle("blur")
+    })
+
+    Array.from(document.querySelectorAll("input[name='help']")).forEach(input => {
+      input.addEventListener("change", (e) => {
+        if((e.target as HTMLInputElement).checked) {
+          (document.getElementById("gif") as HTMLImageElement).src = "/img/" + (input as HTMLInputElement).id.substring(5) + ".gif"
+        }
+      })
+    })
+
+    Array.from(document.querySelectorAll("input[name='help'] + label")).forEach(label => {
+      (label as HTMLElement).style.setProperty("--height", ((label.children[1] as HTMLElement).offsetHeight+40+10) + "px")
+    })
+
     Array.from(document.querySelectorAll(".tooltip")).forEach(tooltip => {
       tooltip.addEventListener("mouseenter", (e) => {
         tooltip.parentElement.dispatchEvent(new Event("mouseleave"))
@@ -842,6 +896,13 @@ export class MapComponent implements OnInit {
         navigator.geolocation.getCurrentPosition(position => {
           this.map.setView([position.coords.latitude, position.coords.longitude])
           this.saveState()
+        }, error => {
+          dispatchEvent(new CustomEvent("notification", {
+            detail: {
+              title: "Erreur",
+              message: "La connexion n'est pas sécurisée."
+            }
+          }))
         })
       } else {
 

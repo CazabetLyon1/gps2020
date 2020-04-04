@@ -4,6 +4,7 @@
 <leaflet-map></leaflet-map>
 <notification-module></notification-module>
 <div id="map_tools">
+  <button type="button" id="help" name="help"></button>
   <input type="radio" id="move_map" name="tools" checked>
   <label class="tool" for="move_map"><span class="tooltip">Déplacer</span></label>
   <input type="radio" id="add" name="tools">
@@ -80,4 +81,43 @@
 </div>
 <import-module></import-module>
 <export-module></export-module>
+<div id="help_container">
+  <div id="help-flex">
+    <div id="text-content">
+      <input type="radio" id="help_move_map" name="help" checked>
+      <label for="help_move_map">
+        <span>Se déplacer</span>
+        <span>Cet outil permet de se déplacer sur la carte.</span>
+      </label>
+      <input type="radio" id="help_add" name="help">
+      <label for="help_add">
+        <span>Ajout d'un point</span>
+        <span>Cet outil permet d'ajouter un point à votre itinéraire GPS. Il est possible de cliquer sur le tracé pour ajouter votre point entre deux autres.</span>
+      </label>
+      <input type="radio" id="help_delete" name="help">
+      <label for="help_delete">
+        <span>Suppression d'un point</span>
+        <span>Cet outil permet de supprimer un point de votre itinéraire GPS.</span>
+      </label>
+      <input type="radio" id="help_move" name="help">
+      <label for="help_move">
+        <span>Déplacement d'un point</span>
+        <span>Cet outil permet de déplacer un point déjà présent sur votre itinéraire GPS. Il est possible de fusionner deux points consécutifs.</span>
+      </label>
+      <input type="radio" id="help_lasso" name="help">
+      <label for="help_lasso">
+        <span>Lasso</span>
+        <span>Cet outil permet de réduire localement le nombre de points de votre itinéraire GPS.</span>
+      </label>
+      <input type="radio" id="help_wand" name="help">
+      <label for="help_wand">
+        <span>Correcteur</span>
+        <span>Cet outil permet de réduire globalement le nombre de points de votre itinéraire GPS.</span>
+      </label>
+    </div>
+    <div id="gif-content">
+      <img id="gif" src="/img/move_map.gif" alt="">
+    </div>
+  </div>
+</div>
 {% endblock %}

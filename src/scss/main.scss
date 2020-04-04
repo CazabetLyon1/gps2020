@@ -209,6 +209,42 @@ button {
   z-index: 10000;
 }
 
+#map_tools #help {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid;
+  margin: 10px 15px 10px 0;
+  background: none;
+  opacity: 0.5;
+  transition: opacity 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+#map_tools #help:hover {
+  opacity: 1;
+}
+
+#map_tools #help::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 16px;
+  height: 16px;
+  background: black;
+  mask-image: url("/img/question.png");
+  -webkit-mask-image: url("/img/question.png");
+  mask-size: 16px;
+  -webkit-mask-size: 16px;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
 #map_tools input[type="radio"] {
   display: none;
 }
@@ -322,32 +358,38 @@ button {
   background: linear-gradient(to right, #0043c4, #00dde9);
 }
 
-#map_tools .tool[for="move_map"]::before {
+#map_tools .tool[for="move_map"]::before,
+#help_container #help-flex #text-content label[for="help_move_map"]::before {
   mask-image: url("/img/move2.png");
   -webkit-mask-image: url("/img/move2.png");
 }
 
-#map_tools .tool[for="add"]::before {
+#map_tools .tool[for="add"]::before,
+#help_container #help-flex #text-content label[for="help_add"]::before {
   mask-image: url("/img/add.png");
   -webkit-mask-image: url("/img/add.png");
 }
 
-#map_tools .tool[for="delete"]::before {
+#map_tools .tool[for="delete"]::before,
+#help_container #help-flex #text-content label[for="help_delete"]::before {
   mask-image: url("/img/delete.png");
   -webkit-mask-image: url("/img/delete.png");
 }
 
-#map_tools .tool[for="move"]::before {
+#map_tools .tool[for="move"]::before,
+#help_container #help-flex #text-content label[for="help_move"]::before {
   mask-image: url("/img/move.png");
   -webkit-mask-image: url("/img/move.png");
 }
 
-#map_tools .tool[for="lasso"]::before {
+#map_tools .tool[for="lasso"]::before,
+#help_container #help-flex #text-content label[for="help_lasso"]::before {
   mask-image: url("/img/lasso.png");
   -webkit-mask-image: url("/img/lasso.png");
 }
 
-#map_tools .tool[for="wand"]::before {
+#map_tools .tool[for="wand"]::before,
+#help_container #help-flex #text-content label[for="help_wand"]::before {
   mask-image: url("/img/wand.png");
   -webkit-mask-image: url("/img/wand.png");
 }
@@ -913,6 +955,166 @@ button {
 
 #export_container #progress-bar > div {
   transition: width 1s ease-in-out !important;
+}
+
+#help_container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  //display: none;
+}
+
+#help_container #help-flex {
+  display: flex;
+}
+
+#help_container #help-flex #text-content {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+}
+
+#help_container #help-flex #text-content input[type="radio"] {
+  display: none;
+}
+
+#help_container #help-flex #text-content input:checked + label {
+  //height: 160px;
+  height: var(--height);
+}
+
+#help_container #help-flex #text-content input:not(:checked) + label span:nth-child(2) {
+  opacity: 0;
+  transition: opacity 0.2s;
+  transition-delay: 0s !important;
+}
+
+#help_container #help-flex #text-content input:checked + label span:nth-child(2) {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+  transition-delay: 0.5s !important;
+}
+
+#help_container.blur label {
+  filter: blur(5px) !important;
+  -webkit-filter: blur(5px) !important;
+}
+
+#help_container #help-flex #text-content label {
+  position: relative;
+  width: 300px;
+  height: 40px;
+  background: rgba(255,255,255,.5);
+  border: 1px solid rgb(170,170,170);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-70px);
+  transition: height 0.5s ease-in-out, filter 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+#help_container #help-flex #text-content label:not(:last-child) {
+  margin-bottom: 20px;
+}
+
+#help_container #help-flex #text-content label::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  background-color: rgb(0,0,0);
+  mask-size: 16px;
+  -webkit-mask-size: 16px;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+#help_container #help-flex #text-content label::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background-color: rgb(0,0,0);
+  mask-image: url("/img/chevron.png");
+  -webkit-mask-image: url("/img/chevron.png");
+  mask-size: 16px;
+  -webkit-mask-size: 16px;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  transition: transform 0.3s ease-in-out;
+}
+
+#help_container #help-flex #text-content input:checked + label::after {
+  transform: rotate(180deg);
+}
+
+
+/*#help_container #help-flex #text-content input:checked + label::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 256px;
+  height: calc(100% + 6px);
+  border: 1px solid rgb(170,170,170);
+  border-radius: 5px;
+}*/
+
+#help_container #help-flex #text-content label span:first-child {
+  display: block;
+  line-height: 40px;
+  font-family: "Helvetica";
+  font-size: 13px;
+  text-indent: 40px;
+}
+
+#help_container #help-flex #text-content label span:nth-child(2) {
+  display: block;
+  line-height: 24px;
+  font-family: "Helvetica";
+  font-size: 13px;
+  margin: 0 10px 10px 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgb(170,170,170);
+  opacity: 0;
+}
+
+#help_container #help-flex #gif-content {
+  width: 330px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#help_container #help-flex #gif-content img {
+  width: 270px;
+  border: 1px solid rgb(170,170,170);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  //display: none;
+}
+
+#help_container #help-flex #gif-content img.centered {
+  //transform: translate(calc(-50% - 15px), 0%);
+  width: 500px;
+  position: absolute;
+  top: calc(50% - 250px);
+  left: calc(50% - 250px);
 }
 
 /*body > *:not(import-module, notification-module, export-module) {
