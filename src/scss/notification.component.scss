@@ -20,7 +20,7 @@
   display: flex;
   align-items: center;
   width: 260px;
-  max-height: 50px;
+  max-height: 70px;
   background: rgba(255,255,255,.75);
   border: 1px solid rgb(170, 170, 170);
   border-radius: 5px;
@@ -48,11 +48,11 @@
 }
 
 #notification-center .notification > span span:first-child {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 #notification-center .notification > span span:nth-child(2) {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 #notification-center .notification button {

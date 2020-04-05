@@ -43,6 +43,7 @@ export class MapComponent implements OnInit {
   private toAdd
   private coordinateToRequest
   private fusion = null
+  private cut = []
 
   private undo: HTMLElement = document.getElementById("undo")
   private redo: HTMLElement = document.getElementById("redo")
@@ -148,12 +149,31 @@ export class MapComponent implements OnInit {
         }
       ).addTo(this.map)
       this.polyline.on('mousedown', (e) => {
-        if(this.toolID() === 1) {
+        if([1, 6].includes(this.toolID())) {
           this.bool = false
           let i = e.target.getLatLngs().findIndex((x,i,t) => L.GeometryUtil.belongsSegment(e.latlng, t[i], t[i+1]))
+          if(this.toolID() === 1) {
+            this.drag = true
+            this.num = i+1
+          } else {
+            if(this.cut.length === 1 && this.cut[0] > i+1) {
+              this.cut[0] = this.cut[0]+1
+            }
+            this.cut.push(i+1)
+          }
           this.addToIndex(e, i+1)
-          this.drag = true
-          this.num = i+1
+          if(this.cut.length > 1) {
+            setTimeout(() => {
+              this.cut.sort()
+              this.coordinates.splice(this.cut[0]+1, this.cut[1]-this.cut[0]-1)
+              this.elevations.splice(this.cut[0]+1, this.cut[1]-this.cut[0]-1)
+              this.cut = []
+              this.draw()
+              this.saveState()
+              this.updateChart()
+              this.updateInformations()
+            }, 300)
+          }
         }
       })
       /*this.polyline.on('mousemove', (e) => {
@@ -361,7 +381,7 @@ export class MapComponent implements OnInit {
       {
         className: "grab-cursor",
         radius: this.map.getZoom() < 16 ? 0 : (this.circles.length === this.point ? 15 : 10),
-        fillColor: '#34616C',
+        fillColor: this.cut.includes(this.circles.length) ? 'red' : '#34616C',
         fillOpacity:1,
         //stroke: false
         stroke: true,
@@ -481,9 +501,11 @@ export class MapComponent implements OnInit {
       this.elevations.splice(idx, 0, ele)
       if(this.point && idx < this.point) this.point++
       this.drawPolyline()
-      this.saveState()
-      this.updateChart()
-      this.updateInformations()
+      if(this.toolID() !== 6) {
+        this.saveState()
+        this.updateChart()
+        this.updateInformations()
+      }
     })
     this.draw()
   }
@@ -622,7 +644,7 @@ export class MapComponent implements OnInit {
     document.getElementById("max").textContent = this.elevations.length ? String(Math.max(...this.elevations).toFixed(2)) : "-"
     document.getElementById("min").textContent = this.elevations.length ? String(Math.min(...this.elevations).toFixed(2)) : "-"
     if(!this.point) {
-      document.getElementById("moy").textContent = this.elevations.length ? String(this.elevations.reduce((moy, ele) => (moy+ele)/2, this.elevations[0]).toFixed(2)) : "-"
+      document.getElementById("moy").textContent = this.elevations.length ? String((this.elevations.reduce((total, ele) => total+ele)/this.elevations.length).toFixed(2)) : "-"
       document.getElementById("moy").classList.remove("highlight")
       document.getElementById("moy").nextElementSibling.textContent = "Moy"
     }
@@ -754,16 +776,29 @@ export class MapComponent implements OnInit {
     this.undo.addEventListener('click', this.prev)
     this.redo.addEventListener('click', this.next)
 
-    document.getElementById("lasso").addEventListener("change", (e) => {
-      if((e.target as HTMLInputElement).checked && this.coordinates.length < 2) {
-        (e.target as HTMLInputElement).checked = false
-        dispatchEvent(new CustomEvent("notification", {
-          detail: {
-            title: "Erreur",
-            message: "Placer au moins deux points."
-          }
-        }))
-      }
+    Array.from(document.querySelectorAll("#lasso, #wand, #cut")).forEach(input => {
+      input.addEventListener("change", (e) => {
+        if((e.target as HTMLInputElement).checked && this.coordinates.length < 3) {
+          (e.target as HTMLInputElement).checked = false
+          dispatchEvent(new CustomEvent("notification", {
+            detail: {
+              title: "Erreur",
+              message: "Placer au moins trois points sur la carte."
+            }
+          }))
+        }
+      })
+    })
+
+    Array.from(document.querySelectorAll("input[name='tools']")).forEach(input => {
+      input.addEventListener("change", () => {
+        if(this.toolID() !== 6 && this.cut.length > 0) {
+          this.coordinates.splice(this.cut[0], 1)
+          this.elevations.splice(this.cut[0], 1)
+          this.cut = []
+          this.draw()
+        }
+      })
     })
 
     document.getElementById("help-flex").addEventListener("click", (e) => {
@@ -931,8 +966,9 @@ export class MapComponent implements OnInit {
     })
 
     document.getElementById("wand").addEventListener("click", () => {
+      if(this.coordinates.length < 3) return
       document.body.classList.toggle("wand_mode")
-      Array.from(document.querySelectorAll("input[name='tools']:not(:last-of-type)")).forEach(input => {
+      Array.from(document.querySelectorAll("input[name='tools']:not(:nth-of-type(6))")).forEach(input => {
         (input as HTMLInputElement).disabled = !(input as HTMLInputElement).disabled
       })
       if(document.body.classList.contains("wand_mode")) {
