@@ -294,6 +294,12 @@ export class MapComponent implements OnInit {
    * @param {LeafletEvent}
   **/
   private move = (e): void => {
+    /*dispatchEvent(new CustomEvent("notification", {
+      detail: {
+        title: "k",
+        message: "jj"
+      }
+    }))*/
     if(!this.point || (this.point && this.drag && this.point === this.num)) {
       const lat = document.getElementById("lat") as HTMLButtonElement
       const lng = document.getElementById("lng") as HTMLButtonElement
@@ -401,9 +407,11 @@ export class MapComponent implements OnInit {
         this.drag = true
         this.num = this.coordinates.findIndex(x => x[0] === (e as L.LeafletMouseEvent).target._latlng.lat && x[1] === (e as L.LeafletMouseEvent).target._latlng.lng)
       })
-      /*.on('mousemove', (e) => {
-        this.move(e)
-      })*/
+      .on('mousemove', (e) => {
+        //this.move(e)
+        //console.log("test")
+        //L.DomEvent.stop(e)
+      })
       .on('mouseup', (e) => {
         //console.log('khk')
       })
@@ -420,21 +428,14 @@ export class MapComponent implements OnInit {
           e.target.setRadius(10)
         }
       })
-      .on('click', (e) => {
+      /*.on('click', (e) => {
         if (this.toolID() === 2) {
           this.delete(e)
         } else if(this.toolID() === 1) {
           L.DomEvent.stop(e)
-          /*if(this.point) {
-            this.point.setRadius(10)
-          }*/
-          /*document.getElementById("lat").textContent = e.target._latlng.lat
-          document.getElementById("lat").style.color = "#34616C"
-          document.getElementById("lng").textContent = e.target._latlng.lng
-          document.getElementById("lng").style.color = "#34616C"*/
           this.circles[this.point] === e.target ? this.unselectMarker() : this.selectMarker(e.target)
         }
-      }))
+      })*/)
       //this.circles[this.circles.length-1].setZIndex(this.circles.length)
       //this.circles[this.circles.length-1].bringToFront()
   }
@@ -650,6 +651,18 @@ export class MapComponent implements OnInit {
     }
   }
 
+  private erase = (e): void => {
+    if((e.target as HTMLInputElement).checked){
+      this.coordinates = []
+      this.elevations = []
+      this.draw()
+      this.updateChart()
+      this.updateInformations()
+      this.saveState() ;
+      (e.target as HTMLInputElement).checked = false
+    }
+  }
+
   /**
    * Initialisation de la map et ajout des EventListener
   **/
@@ -775,6 +788,8 @@ export class MapComponent implements OnInit {
 
     this.undo.addEventListener('click', this.prev)
     this.redo.addEventListener('click', this.next)
+
+    document.getElementById("erase").addEventListener("change", this.erase)
 
     Array.from(document.querySelectorAll("#lasso, #wand, #cut")).forEach(input => {
       input.addEventListener("change", (e) => {
