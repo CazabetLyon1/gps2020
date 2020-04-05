@@ -679,15 +679,17 @@ export class MapComponent implements OnInit {
     this.map.on('mouseup', () => {
       if(this.toAdd) {
         //this.addShortcut()
+        this.toAdd.sort().reverse()
+        console.log(this.toAdd)
         this.toAdd.forEach(idx => {
-          //console.log('remove',idx)
+          console.log('remove',idx)
           this.coordinates.splice(idx, 1)
           this.elevations.splice(idx, 1)
-          this.saveState()
-          this.updateChart()
-          this.updateInformations()
-          this.draw()
         })
+        this.saveState()
+        this.updateChart()
+        this.updateInformations()
+        this.draw()
         this.map.removeLayer(this.lasso)
         this.lasso = null
         this.toAdd = null
@@ -752,6 +754,18 @@ export class MapComponent implements OnInit {
     this.undo.addEventListener('click', this.prev)
     this.redo.addEventListener('click', this.next)
 
+    document.getElementById("lasso").addEventListener("change", (e) => {
+      if((e.target as HTMLInputElement).checked && this.coordinates.length < 2) {
+        (e.target as HTMLInputElement).checked = false
+        dispatchEvent(new CustomEvent("notification", {
+          detail: {
+            title: "Erreur",
+            message: "Placer au moins deux points."
+          }
+        }))
+      }
+    })
+
     document.getElementById("help-flex").addEventListener("click", (e) => {
       e.stopPropagation()
     })
@@ -768,7 +782,9 @@ export class MapComponent implements OnInit {
           }, i * 100) ;
         })
       }, {once: true})
-    })
+    }) ;
+
+    (document.getElementById("gif") as HTMLImageElement).src = "/img/move_map.gif"
 
     document.getElementById("help_container").addEventListener("click", () => {
       document.getElementById("gif").style.opacity = "0"
@@ -947,6 +963,12 @@ export class MapComponent implements OnInit {
         //let total = distances.reduce((total, x) => total+x, 0)
         //let min = Math.min(...distances)
         //let max = Math.max(...distances)
+        let div = document.createElement("div")
+            div.id = "tolerance-container"
+        let div1 = document.createElement("div")
+        let span1 = document.createElement("span")
+            span1.textContent = this.coordinates.length
+        div1.appendChild(span1)
         let range = document.createElement("input")
             range.type = "range"
             range.name = "tolerance"
@@ -972,12 +994,46 @@ export class MapComponent implements OnInit {
               this.elevations = new_coordinates.elevations
               this.draw()
             })
-        document.body.appendChild(range)
+        div1.appendChild(range)
+        let span2 = document.createElement("span")
+            span2.textContent = "2"
+        div1.appendChild(span2)
+        div.appendChild(div1)
+        /*let div1 = document.createElement("div")
+        let span1 = document.createElement("span")
+            span1.textContent = this.coordinates.length
+        let span2 = document.createElement("span")
+            span2.textContent = this.coordinates.length
+        div1.appendChild(span1)
+        div1.appendChild(span2)
+        div.appendChild(div1)*/
+        let div2 = document.createElement("div")
+        let cancel = document.createElement("button")
+            cancel.id = "cancel"
+            cancel.name = "cancel"
+            cancel.textContent = "Annuler"
+            cancel.addEventListener("click", () => {
+              this.coordinates = save
+              this.elevations = saveE
+              document.getElementById("wand").dispatchEvent(new Event("click"))
+            })
+        let validation = document.createElement("button")
+            validation.id = "validation"
+            validation.name = "validation"
+            validation.textContent = "Valider"
+            validation.addEventListener("click", () => {
+              document.getElementById("wand").dispatchEvent(new Event("click"))
+            })
+        div2.appendChild(cancel)
+        div2.appendChild(validation)
+        div.appendChild(div2)
+        document.body.appendChild(div)
       } else {
-        document.getElementById("tolerance").remove()
+        document.getElementById("tolerance-container").remove()
         this.saveState()
         this.updateChart()
         this.updateInformations()
+        this.draw()
       }
     })
 

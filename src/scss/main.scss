@@ -394,10 +394,77 @@ button {
   -webkit-mask-image: url("/img/wand.png");
 }
 
-#tolerance {
+#tolerance-container {
   position: absolute;
   top: 100px;
   right: 40px;
+  z-index: 10000;
+  width: 250px;
+  //background: white;
+  display: flex;
+  flex-direction: column;
+  //border: 1px solid rgb(170,170,170);
+  //border-radius: 4px;
+}
+
+#tolerance-container > div:first-of-type,
+#tolerance-container > div:nth-of-type(2) {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  //border-top: 1px solid rgb(170,170,170);
+}
+
+/*#tolerance-container > div:first-of-type::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: 117px;
+  width: 16px;
+  height: 16px;
+  background: black;
+  mask-image: url("/img/arrow.png");
+  -webkit-mask-image: url("/img/arrow.png");
+  mask-size: 16px;
+  -webkit-mask-size: 16px;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}*/
+
+#tolerance-container > div:first-of-type span {
+  width: 50%;
+  height: 100%;
+  font-family: "Helvetica";
+  font-size: 12px;
+  line-height: 50px;
+  text-align: center;
+}
+
+#tolerance-container > div:nth-of-type(2) button {
+  width: 50%;
+  margin: 0 20px;
+  height: 34px;
+  font-family: "Helvetica";
+  font-size: 12px;
+  line-height: 30px;
+  text-align: center;
+  border: 1px solid #aaaaaa;
+  background: rgb(250,250,250);
+  border-radius: 3px;
+}
+
+/*#tolerance-container > div:nth-of-type(2) button:last-child {
+  border-left: 1px solid rgb(170,170,170);
+}*/
+
+#tolerance {
+  //position: absolute;
+  //top: 100px;
+  //right: 40px;
   //transform: translate(-50%, 50%);
   z-index: 10000;
   outline: 0;
@@ -408,7 +475,7 @@ button {
   -webkit-appearance: none;
   background-color: transparent;
   //border-radius: 20px;
-  margin: 0 10px;
+  margin: 20px auto;
 }
 
 #tolerance::-webkit-slider-runnable-track {

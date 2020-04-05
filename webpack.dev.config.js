@@ -131,5 +131,8 @@ module.exports = {
       path.join(__dirname, './dist'),
       {}
     ),*/
-  ]
+  ],
+  optimization: {
+    minimize: false
+  }
 }
