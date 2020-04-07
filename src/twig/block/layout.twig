@@ -4,6 +4,7 @@
     <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>-->
     <!--<link rel="stylesheet" href="https://unpkg.com/mapbox-gl@1.7.0/dist/mapbox-gl.css"/>-->
     <link rel="stylesheet" href="/leaflet.css"/>
+    <link rel="stylesheet" href="/cookieconsent/cookieconsent.min.css">
     <link rel="manifest" href="/manifest.webmanifest">
     <meta charset='utf-8'/>
     <meta name="author" content="Guyonnet Amaury">
@@ -23,6 +24,31 @@
 		<title>Lifprojet GPS</title>
 	</head>
 	<body>
+      <script type="text/javascript" src="/cookieconsent/cookieconsent.min.js"></script>
+      <script type="text/javascript">
+        window.cookieconsent.initialise({
+          container: document.body,
+          position: "bottom-left",
+          theme: "edgeless",
+          palette: {
+            popup: {background: "#FFF"},
+            button: {background: "#000"}
+          },
+          content: {
+            message: "Ce site internet utilise des cookies pour vous garantir la meilleure expérience possible.",
+            dismiss: "J'ai compris.",
+            link: "En savoir plus"
+          },
+          revokable: true,
+          /*onStatusChange: function(status) {
+            console.log(this.hasConsented() ? 'enable cookies' : 'disable cookies')
+          },*/
+          law: {
+            regionalLaw: true
+          },
+          location: false
+        })
+      </script>
       <main>
         {% block page %}{% endblock %}
       </main>

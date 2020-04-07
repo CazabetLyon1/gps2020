@@ -15,6 +15,7 @@ app.use(express.static('dist'))
 app.use('/img', express.static('src/img'))
 app.use('/leaflet.css', express.static('node_modules/leaflet/dist/leaflet.css'))
 app.use('/manifest.webmanifest', express.static('manifest.webmanifest'))
+app.use('/cookieconsent', express.static('node_modules/cookieconsent/build'))
 
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/html')
