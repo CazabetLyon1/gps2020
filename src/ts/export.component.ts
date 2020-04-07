@@ -41,53 +41,97 @@ export class ExportComponent implements OnInit {
     document.querySelector("#classic_method").addEventListener("change", (e) => {
       if((e.target as HTMLInputElement).checked) {
         this.toggleElements(false).then(() => {
-          let a = document.createElement("div")
-              a.id = "progress-bar"
-          let b = document.createElement("div")
-          a.appendChild(b)
-          this.module.querySelector("#export_container").appendChild(a)
-          window.addEventListener("data", (e) => {
-            setTimeout(() => {
-              b.style.width = "100%"
-            }, 300)
-            let s = this.generateFile((e as any).detail)
-            let blob = new Blob([s], {type: "application/xml"})
-            let url = window.URL.createObjectURL(blob)
-            let l = document.createElement("a")
-                l.className = "file-link"
-                l.href = url
-                l.download = "file.gpx"
-            let span1 = document.createElement("span")
-                span1.textContent = this.bytesToSize(blob.size)
-            let span2 = document.createElement("span")
-            let span21 = document.createElement("span")
-                span21.textContent = "Votre fichier"
-            let span22 = document.createElement("span")
-                span22.textContent = "Fichier GPX"
-            span2.appendChild(span21)
-            span2.appendChild(span22)
-            l.appendChild(span1)
-            l.appendChild(span2)
-            this.module.querySelector("#export_container").appendChild(l)
-            b.addEventListener("transitionend", () => {
-              a.remove()
-              l.style.opacity = "1"
-            }, {once: true})
-            //a.click()
-            //window.URL.revokeObjectURL(url)
-          }, {once: true})
-          dispatchEvent(new CustomEvent("need_data"))
+          this.createFile(false)
         })
       }
     })
+    document.querySelector("#advanced_method").addEventListener("change", (e) => {
+      if((e.target as HTMLInputElement).checked) {
+        this.toggleElements(false).then(() => {
+          window.addEventListener("init_file", () => {
+            this.createFile(true)
+          }, {once: true})
+          dispatchEvent(new CustomEvent("metadata"))
+        })
+      }
+    })
+  }
+
+  private createFile = (bool): void => {
+    let a = document.createElement("div")
+        a.id = "progress-bar"
+    let b = document.createElement("div")
+    a.appendChild(b)
+    this.module.querySelector("#export_container").appendChild(a)
+    window.addEventListener("data", (e) => {
+      setTimeout(() => {
+        b.style.width = "100%"
+      }, 300)
+      let data = (e as any).detail
+      if(!bool) delete data["metadata"]
+      let s = this.generateFile(data)
+      let blob = new Blob([s], {type: "application/xml"})
+      let url = window.URL.createObjectURL(blob)
+      let l = document.createElement("a")
+          l.className = "file-link"
+          l.href = url
+          l.download = "file.gpx"
+      let span1 = document.createElement("span")
+          span1.textContent = this.bytesToSize(blob.size)
+      let span2 = document.createElement("span")
+      let span21 = document.createElement("span")
+          span21.textContent = "Votre fichier"
+      let span22 = document.createElement("span")
+          span22.textContent = "Fichier GPX"
+      span2.appendChild(span21)
+      span2.appendChild(span22)
+      l.appendChild(span1)
+      l.appendChild(span2)
+      this.module.querySelector("#export_container").appendChild(l)
+      b.addEventListener("transitionend", () => {
+        a.remove()
+        l.style.opacity = "1"
+      }, {once: true})
+      //a.click()
+      //window.URL.revokeObjectURL(url)
+    }, {once: true})
+    dispatchEvent(new CustomEvent("need_data"))
   }
 
   private generateFile = (data): string => {
     let doc = document.implementation.createDocument("", "", null) as XMLDocument
     let gpx = doc.createElement("gpx")
         gpx.setAttribute("version", "1.1")
-    //let metadata = doc.createElement("metadata")
-        //gpx.appendChild(metadata)
+    if(data.hasOwnProperty("metadata")) {
+      let metadata = doc.createElement("metadata")
+      gpx.appendChild(metadata)
+      if(data.metadata.hasOwnProperty("name")) {
+        let name = doc.createElement("name")
+            name.textContent = data.metadata.name
+        metadata.appendChild(name)
+      }
+      if(data.metadata.hasOwnProperty("desc")) {
+        let desc = doc.createElement("desc")
+            desc.textContent = data.metadata.desc
+        metadata.appendChild(desc)
+      }
+      if(data.metadata.hasOwnProperty("author")) {
+        let author = doc.createElement("author")
+        if(data.metadata.author.hasOwnProperty("name")) {
+          let name = doc.createElement("name")
+              name.textContent = data.metadata.author.name
+          author.appendChild(name)
+        }
+        if(data.metadata.author.hasOwnProperty("email")) {
+          let email = doc.createElement("email")
+          let parts = data.metadata.author.email.split("@")
+              email.id = parts[0]
+              email.setAttribute("domain", parts[1])
+          metadata.appendChild(email)
+        }
+        metadata.appendChild(author)
+      }
+    }
     let trk = doc.createElement("trk")
     let trkseg = doc.createElement("trkseg")
     data.coordinates.forEach((x, i) => {

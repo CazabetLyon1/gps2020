@@ -6,7 +6,8 @@
 
 #notification-center {
   width: 300px;
-  //height: calc(100vh - 120px);
+  max-height: calc(100vh - 120px);
+  overflow-y: scroll;
   position: absolute;
   top: 120px;
   left: 0;
@@ -19,8 +20,9 @@
 #notification-center .notification {
   display: flex;
   align-items: center;
-  width: 260px;
+  width: 258px;
   max-height: 70px;
+  min-height: 50px;
   background: rgba(255,255,255,.75);
   border: 1px solid rgb(170, 170, 170);
   border-radius: 5px;

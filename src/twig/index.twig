@@ -25,6 +25,7 @@
 <div id="top-left">
   <img src="/img/map.png" alt="Logo Lifprojet">
   <span>L<span>ifprojet</span></span>
+  <button type="button" id="info" name="info" aria-label="info"></button>
 </div>
 <div id="coordinates">
   <button type="button" name="undo" id="undo" aria-label="undo" disabled></button>
@@ -134,6 +135,29 @@
     <div id="gif-content">
       <img id="gif" src="" alt="">
     </div>
+  </div>
+</div>
+<div id="metadata-container">
+  <div id="metadata">
+    <span>Metadonnées</span>
+    <span>Vous pouvez renseigner des metadonnées qui seront sauver au sein du fichier lors d'une exportation.</span>
+    <label>
+      <span>Nom</span>
+      <input type="text" id="author" name="metadata" placeholder="John Doe" spellcheck="false" autocomplete="off">
+    </label>
+    <label>
+      <span>Email</span>
+      <input type="text" id="email" name="metadata" placeholder="john.doe@icloud.com" spellcheck="false" autocomplete="off">
+    </label>
+    <label>
+      <span>Intitulé</span>
+      <input type="text" id="name" name="metadata" placeholder="Randonnée Central Park" spellcheck="false" autocomplete="off">
+    </label>
+    <label>
+      <span>Description</span>
+      <textarea id="desc" name="desc" spellcheck="false" autocomplete="off"></textarea>
+    </label>
+    <button type="button" id="valid_metadata" name="valid_metadata"></button>
   </div>
 </div>
 {% endblock %}
