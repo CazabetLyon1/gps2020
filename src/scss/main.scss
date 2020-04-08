@@ -1,7 +1,9 @@
 body, html {
   margin: 0;
   padding: 0;
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   //min-height: 100vh;
 }
 
@@ -57,7 +59,7 @@ button {
   transform: translateX(-50%);
 }
 
-#coordinates span {
+/*#coordinates span {
   position: relative;
   background: rgba(255,255,255,1);
   border: 1px solid rgba(203,204,205,1);
@@ -73,7 +75,7 @@ button {
   line-height: 20px;
   margin-left: 10px;
   display: none;
-}
+}*/
 
 /*#coordinates span::before {
   display: block;
@@ -297,7 +299,7 @@ button {
   cursor: pointer;
 }
 
-#map_tools .tool .tooltip {
+.tooltip {
   position: absolute;
   top: 66px;
   left: 50%;
@@ -315,7 +317,7 @@ button {
   transition: opacity .5s linear;
 }
 
-#map_tools .tool .tooltip::before {
+.tooltip::before {
   content: '';
   display: block;
   position: absolute;
@@ -330,7 +332,7 @@ button {
   transition: opacity .3s linear;
 }
 
-#map_tools .tool .tooltip::after {
+.tooltip::after {
   content: '';
   display: block;
   position: absolute;
@@ -345,9 +347,9 @@ button {
   transition: opacity .3s linear;
 }
 
-#map_tools .tool .tooltip.hover,
-#map_tools .tool .tooltip.hover::before,
-#map_tools .tool .tooltip.hover::after {
+.tooltip.hover,
+.tooltip.hover::before,
+.tooltip.hover::after {
   opacity: 1;
 }
 
@@ -387,6 +389,11 @@ button {
 #map_tools input:checked + .tool::before {
   mask-size: 21px;
   -webkit-mask-size: 21px;
+}
+
+#map_tools .tool.hover {
+  z-index: 10000;
+  cursor: pointer;
 }
 
 #map_tools .tool:hover::before,
