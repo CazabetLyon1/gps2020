@@ -1337,7 +1337,17 @@ label[for="zoom"] {
   font-size: 12px;
 }
 
-#metadata-container #metadata label input[type="text"],
+#metadata-container #metadata label input {
+  width: 250px;
+  height: 22px;
+  padding: 25px 10px 9px 60px;
+  border-radius: 4px;
+  border: 1px solid #aaaaaa;
+  outline: none;
+  font-family: "Helvetica";
+  font-size: 14px;
+}
+
 #metadata-container #metadata label textarea {
   width: 250px;
   height: 22px;
