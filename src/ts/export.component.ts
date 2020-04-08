@@ -104,33 +104,35 @@ export class ExportComponent implements OnInit {
         gpx.setAttribute("version", "1.1")
     if(data.hasOwnProperty("metadata")) {
       let metadata = doc.createElement("metadata")
-      gpx.appendChild(metadata)
-      if(data.metadata.hasOwnProperty("name")) {
+      if(data.metadata.hasOwnProperty("name") && data.metadata.name !== "") {
         let name = doc.createElement("name")
             name.textContent = data.metadata.name
         metadata.appendChild(name)
       }
-      if(data.metadata.hasOwnProperty("desc")) {
+      if(data.metadata.hasOwnProperty("desc") && data.metadata.desc !== "") {
         let desc = doc.createElement("desc")
             desc.textContent = data.metadata.desc
         metadata.appendChild(desc)
       }
       if(data.metadata.hasOwnProperty("author")) {
         let author = doc.createElement("author")
-        if(data.metadata.author.hasOwnProperty("name")) {
+        if(data.metadata.author.hasOwnProperty("name") && data.metadata.author.name !== "") {
           let name = doc.createElement("name")
               name.textContent = data.metadata.author.name
           author.appendChild(name)
         }
-        if(data.metadata.author.hasOwnProperty("email")) {
+        if(data.metadata.author.hasOwnProperty("email") && data.metadata.author.email !== "") {
           let email = doc.createElement("email")
           let parts = data.metadata.author.email.split("@")
-              email.id = parts[0]
-              email.setAttribute("domain", parts[1])
-          metadata.appendChild(email)
+          if(parts.length > 1) {
+            email.id = parts[0]
+            email.setAttribute("domain", parts[1])
+            metadata.appendChild(email)
+          }
         }
-        metadata.appendChild(author)
+        if(author.children.length !== 0) metadata.appendChild(author)
       }
+      gpx.appendChild(metadata)
     }
     let trk = doc.createElement("trk")
     let trkseg = doc.createElement("trkseg")

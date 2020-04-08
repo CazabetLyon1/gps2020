@@ -62,7 +62,34 @@ export class MapComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    this.initMap()
+    //this.initMap()
+    const el = document.getElementById("top-left")
+    el.style.transform = "translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 100px)) scale(5)"
+    setTimeout(() => {
+      el.style.transition = "filter 0.5s ease-in-out, transform 1.5s ease-in-out, opacity 1.5s ease-in-out"
+      el.style.transform = "translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 100px)) scale(2)"
+      //el.classList.add("centered")
+    }, 500)
+    /*el.addEventListener("transitionstart", (e) => {
+      el.style.opacity = "1"
+    }, {once: true})*/
+    el.addEventListener("transitionend", (e) => {
+      if(e.propertyName === "transform") {
+        el.style.transition = "filter 0.5s ease-in-out, transform 0.5s ease-in-out"
+        console.log(window.getComputedStyle(el, "transform"))
+        el.style.transform = "translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 120px)) scale(2)"
+        el.addEventListener("transitionend", (e) => {
+          if(e.elapsedTime === 0.5) {
+            document.getElementById("page-progress").addEventListener("transitionend", () => {
+              this.initMap()
+            }, {once: true})
+            document.getElementById("page-progress").style.opacity = "1"
+          }
+        }, {once: true})
+      }
+      //console.log(e)
+    }, {once: true})
+    //}, {once: true})
   }
 
   /**
@@ -706,6 +733,16 @@ export class MapComponent implements OnInit {
     (document.getElementById("desc") as HTMLTextAreaElement).value = this.metadata.hasOwnProperty("desc") ? this.metadata.desc : "" ;
   }
 
+  private loadCSS = (src): any => {
+    return new Promise((resolve, reject) => {
+      let link = document.createElement("link")
+          link.rel = "stylesheet"
+          link.href = src
+          link.addEventListener("load", (e) => resolve(e))
+      document.head.appendChild(link)
+    })
+  }
+
   /**
    * Initialisation de la map et ajout des EventListener
   **/
@@ -733,17 +770,69 @@ export class MapComponent implements OnInit {
       detectRetina: true,
       attribution: '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     })
+
+    /*tiles.on('remainingLength', (e) => {
+      console.log('A')
+      console.log(e)
+    })
+
+    tiles.on('queueLength', (e) => {
+      console.log('B')
+      console.log(e)
+    })
+
+    tiles.on('seedstart', (e) => {
+      console.log('C')
+      console.log(e)
+    })*/
+    let length = 0
+    let progress = 0
+    const el = document.getElementById("page-progress").children[0] as HTMLElement
+    const el2 = el.parentElement.parentElement as HTMLElement
+    tiles.on('tileloadstart', (e) => length++ )
+    tiles.on('tileload', (e) => {
+      progress++
+      el.style.width = (progress/length)*100 + "%"
+    })
+    tiles.on('load', (e) => {
+      el.parentElement.addEventListener("transitionend", () => {
+        el2.style.opacity = "0"
+      }, {once: true})
+      el2.addEventListener("transitionend", (e) => {
+        if((e.target as HTMLElement).id === "loader") {
+          el2.remove()
+        }
+      })
+      setTimeout(() => {
+        Promise.all([
+          this.loadCSS("/cookieconsent/cookieconsent.min.css"),
+          this.loadCSS("/leaflet.css")
+        ]).then(x => {
+          //console.log(x)
+          el.parentElement.style.opacity = "0"
+          el.parentElement.addEventListener("transitionend", () => {
+            document.getElementById("top-left").addEventListener("transitionend", () => {
+              (document.querySelector("#top-left span > span") as HTMLElement).style.marginRight = "15px" ;
+              document.getElementById("info").style.display = "block"
+              document.getElementById("info").style.opacity = ""
+            }, {once: true})
+            document.getElementById("top-left").style.transform = ""
+          }, {once: true})
+        })
+      }, 500);
+    })
+
     tiles.addTo(this.map)
 
     /*tiles.on('tilecachehit', (e) => {
       console.log(e.url)
-    })
+    })*/
 
-    tiles.on('tilecachemiss', (e) => {
+    /*tiles.on('tilecachemiss', (e) => {
       console.log(e.url)
-    })
+    })*/
 
-    tiles.on('tilecacheerror', (e) => {
+    /*tiles.on('tilecacheerror', (e) => {
       console.log(e)
     })*/
 
@@ -929,10 +1018,12 @@ export class MapComponent implements OnInit {
       }, {once: true})
     }) ;
 
-    (document.getElementById("gif") as HTMLImageElement).src = "/img/move_map.gif"
-
     document.getElementById("help_container").addEventListener("click", () => {
-      document.getElementById("gif").style.opacity = "0"
+      const gif = document.getElementById("gif") as HTMLImageElement
+      gif.style.opacity = "0"
+      if(gif.src = "") {
+        gif.src = "/img/move_map.gif"
+      }
       Array.from(document.querySelectorAll("input[name='help'] + label")).reverse().forEach((label, i, array) => {
         if(i+1 === array.length) {
           label.addEventListener("transitionend", () => {

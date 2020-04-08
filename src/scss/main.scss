@@ -14,7 +14,18 @@ button {
   position: absolute;
   top: 40px;
   left: 40px;
-  z-index: 10000;
+  z-index: 10005;
+  opacity: 1;
+}
+
+/*#top-left.centered {
+  transform: translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 40px)) scale(1);
+}*/
+
+#top-left #info {
+  display: none;
+  opacity: 0.5;
+  transition: opacity 0.5s ease-in-out;
 }
 
 #top-left img {
@@ -32,7 +43,7 @@ button {
 
 #top-left span > span {
   font-size: 14px;
-  margin-right: 15px;
+  //margin-right: 15px;
 }
 
 #coordinates {
@@ -1343,6 +1354,10 @@ label[for="zoom"] {
   resize: none;
 }
 
+#metadata-container #metadata #valid_metadata {
+  opacity: 0;
+}
+
 
 
 /*body > *:not(import-module, notification-module, export-module) {
@@ -1354,13 +1369,13 @@ body.blur > *:not(import-module, notification-module, export-module) {
   -webkit-filter: blur(5px) !important;
 }*/
 
-body.blur #map,
+body #map,
 body #top-left,
 body #coordinates,
 body #map_tools,
 body #bottom-right,
 body #bottom-left {
-  transition: filter .5s ease-in-out !important;
+  transition: filter .5s ease-in-out ;
 }
 
 body.blur #map,

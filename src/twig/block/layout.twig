@@ -3,8 +3,40 @@
   <head>
     <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>-->
     <!--<link rel="stylesheet" href="https://unpkg.com/mapbox-gl@1.7.0/dist/mapbox-gl.css"/>-->
-    <link rel="stylesheet" href="/leaflet.css"/>
-    <link rel="stylesheet" href="/cookieconsent/cookieconsent.min.css">
+    <style>
+      #loader {
+        z-index: 10005;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgb(255,255,255,1);
+        opacity: 1;
+        transition: opacity 1.2s ease-in-out;
+      }
+      #page-progress {
+        opacity: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        height: 15px;
+        border: 2px solid rgb(40,40,40);
+        overflow: hidden;
+        border-radius: 15px;
+        box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
+        transition: opacity 0.9s ease-in-out;
+      }
+      #page-progress > div {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(to left, #00c6fb 0%, #005bea 100%);
+      }
+    </style>
+    <!--<link rel="stylesheet" href="/leaflet.css"/>
+    <link rel="stylesheet" href="/cookieconsent/cookieconsent.min.css">-->
     <link rel="manifest" href="/manifest.webmanifest">
     <meta charset='utf-8'/>
     <meta name="author" content="Guyonnet Amaury">

@@ -1,6 +1,9 @@
 {% extends './block/layout.twig' %}
 
 {% block page %}
+<div id="loader">
+  <div id="page-progress"><div></div></div>
+</div>
 <leaflet-map></leaflet-map>
 <notification-module></notification-module>
 <div id="map_tools">
@@ -25,7 +28,7 @@
 <div id="top-left">
   <img src="/img/map.png" alt="Logo Lifprojet">
   <span>L<span>ifprojet</span></span>
-  <button type="button" id="info" name="info" aria-label="info"></button>
+  <button type="button" id="info" name="info" aria-label="info" style="opacity:0;"></button>
 </div>
 <div id="coordinates">
   <button type="button" name="undo" id="undo" aria-label="undo" disabled></button>
@@ -109,7 +112,7 @@
       <input type="radio" id="help_move" name="help">
       <label for="help_move">
         <span>Déplacement d'un point</span>
-        <span>Cet outil permet de déplacer un point déjà présent sur votre itinéraire GPS. Il est possible de fusionner deux points consécutifs.</span>
+        <span>Cet outil permet de déplacer un point déjà présent sur votre itinéraire GPS. Il est possible de fusionner deux points consécutifs en déplaçant un des points vers le deuxième. Si les deux points ne sont pas consécutifs alors les deux points subsistent et sont modifiables individuellement (cela permet par exemple de créer un cycle).</span>
       </label>
       <input type="radio" id="help_lasso" name="help">
       <label for="help_lasso">
@@ -157,7 +160,7 @@
       <span>Description</span>
       <textarea id="desc" name="desc" spellcheck="false" autocomplete="off"></textarea>
     </label>
-    <button type="button" id="valid_metadata" name="valid_metadata"></button>
+    <button type="button" id="valid_metadata" name="valid_metadata" aria-label="valid_metadata">Valider</button>
   </div>
 </div>
 {% endblock %}
