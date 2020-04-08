@@ -1,9 +1,13 @@
 {% extends './block/layout.twig' %}
 
 {% block page %}
+<div id="loader">
+  <div id="page-progress"><div></div></div>
+</div>
 <leaflet-map></leaflet-map>
 <notification-module></notification-module>
 <div id="map_tools">
+  <button type="button" id="help" name="help" aria-label="help"></button>
   <input type="radio" id="move_map" name="tools" checked>
   <label class="tool" for="move_map"><span class="tooltip">Déplacer</span></label>
   <input type="radio" id="add" name="tools">
@@ -16,26 +20,31 @@
   <label class="tool" for="lasso"><span class="tooltip">Lasso</span></label>
   <input type="radio" id="wand" name="tools">
   <label class="tool" for="wand"><span class="tooltip">Correcteur</span></label>
+  <input type="radio" id="cut" name="tools">
+  <label class="tool" for="cut"><span class="tooltip">Raccourci</span></label>
+  <input type="radio" id="erase" name="tools">
+  <label class="tool" for="erase"><span class="tooltip">Effacer</span></label>
 </div>
 <div id="top-left">
   <img src="/img/map.png" alt="Logo Lifprojet">
   <span>L<span>ifprojet</span></span>
+  <button type="button" id="info" name="info" aria-label="info" style="opacity:0;"></button>
 </div>
 <div id="coordinates">
-  <button type="button" name="undo" id="undo" disabled></button>
+  <button type="button" name="undo" id="undo" aria-label="undo" disabled></button>
   <!--<button type="button" name="zoomin" id="zoomin"></button>-->
   <!--<span id="lat"></span><span id="lng"></span>-->
-  <button type="button" name="localization" id="localization"></button>
+  <button type="button" name="localization" id="localization" aria-label="localize"></button>
   <!--<button type="button" name="compass" id="compass"></button>-->
   <!--<button type="button" name="zoomout" id="zoomout"></button>-->
-  <button type="button" name="redo" id="redo" disabled></button>
+  <button type="button" name="redo" id="redo" aria-label="redo" disabled></button>
 </div>
 <!--<div id="buttonss">
   <button type="button" name="import" id="import"></button>
   <button type="button" name="export" id="export"></button>
 </div>-->
 <div id="bottom-left">
-  <input type="checkbox" name="hide_details" id="hide_details" checked>
+  <input type="checkbox" name="hide_details" id="hide_details">
   <label for="hide_details"></label>
   <div>
     <apex-chart></apex-chart>
@@ -74,10 +83,84 @@
   </div>
 </div>
 <div id="bottom-right">
-  <button type="button" name="zoomout" id="zoomout"></button>
+  <button type="button" name="zoomout" id="zoomout" aria-label="zoom out"></button>
+  <label for="zoom">
   <input type="range" name="zoom" id="zoom" class="level-0" min="0" max="18" step="1" value="0">
-  <button type="button" name="zoomin" id="zoomin"></button>
+  </label>
+  <button type="button" name="zoomin" id="zoomin" aria-label="zoom in"></button>
 </div>
 <import-module></import-module>
 <export-module></export-module>
+<div id="help_container">
+  <div id="help-flex">
+    <div id="text-content">
+      <input type="radio" id="help_move_map" name="help" checked>
+      <label for="help_move_map">
+        <span>Se déplacer</span>
+        <span>Cet outil permet de se déplacer sur la carte.</span>
+      </label>
+      <input type="radio" id="help_add" name="help">
+      <label for="help_add">
+        <span>Ajout d'un point</span>
+        <span>Cet outil permet d'ajouter un point à votre itinéraire GPS. Il est possible de cliquer sur le tracé pour ajouter votre point entre deux autres.</span>
+      </label>
+      <input type="radio" id="help_delete" name="help">
+      <label for="help_delete">
+        <span>Suppression d'un point</span>
+        <span>Cet outil permet de supprimer un point de votre itinéraire GPS.</span>
+      </label>
+      <input type="radio" id="help_move" name="help">
+      <label for="help_move">
+        <span>Déplacement d'un point</span>
+        <span>Cet outil permet de déplacer un point déjà présent sur votre itinéraire GPS. Il est possible de fusionner deux points consécutifs en déplaçant un des points vers le deuxième. Si les deux points ne sont pas consécutifs alors les deux points subsistent et sont modifiables individuellement (cela permet par exemple de créer un cycle).</span>
+      </label>
+      <input type="radio" id="help_lasso" name="help">
+      <label for="help_lasso">
+        <span>Lasso</span>
+        <span>Cet outil permet de réduire localement le nombre de points de votre itinéraire GPS.</span>
+      </label>
+      <input type="radio" id="help_wand" name="help">
+      <label for="help_wand">
+        <span>Correcteur</span>
+        <span>Cet outil permet de réduire globalement le nombre de points de votre itinéraire GPS.</span>
+      </label>
+      <input type="radio" id="help_cut" name="help">
+      <label for="help_cut">
+        <span>Raccourci</span>
+        <span>Cet outil permet de réduire localement votre itinéraire GPS en indiquant deux points.</span>
+      </label>
+      <input type="radio" id="help_erase" name="help">
+      <label for="help_erase">
+        <span>Effacer</span>
+        <span>Cet outil permet d'effacer votre itinéraire GPS.</span>
+      </label>
+    </div>
+    <div id="gif-content">
+      <img id="gif" src="" alt="">
+    </div>
+  </div>
+</div>
+<div id="metadata-container">
+  <div id="metadata">
+    <span>Metadonnées</span>
+    <span>Vous pouvez renseigner des metadonnées qui seront sauver au sein du fichier lors d'une exportation.</span>
+    <label>
+      <span>Nom</span>
+      <input type="text" id="author" name="metadata" placeholder="John Doe" spellcheck="false" autocomplete="off">
+    </label>
+    <label>
+      <span>Email</span>
+      <input type="text" id="email" name="metadata" placeholder="john.doe@icloud.com" spellcheck="false" autocomplete="off">
+    </label>
+    <label>
+      <span>Intitulé</span>
+      <input type="text" id="name" name="metadata" placeholder="Randonnée Central Park" spellcheck="false" autocomplete="off">
+    </label>
+    <label>
+      <span>Description</span>
+      <textarea id="desc" name="desc" spellcheck="false" autocomplete="off"></textarea>
+    </label>
+    <button type="button" id="valid_metadata" name="valid_metadata" aria-label="valid_metadata">Valider</button>
+  </div>
+</div>
 {% endblock %}

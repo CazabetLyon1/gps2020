@@ -43,6 +43,15 @@ export class MapComponent implements OnInit {
   private toAdd
   private coordinateToRequest
   private fusion = null
+  private cut = []
+  private metadata: {
+    name?: string,
+    desc?: string,
+    author?: {
+      name?: string,
+      email?: string
+    }
+  } = {}
 
   private undo: HTMLElement = document.getElementById("undo")
   private redo: HTMLElement = document.getElementById("redo")
@@ -53,7 +62,34 @@ export class MapComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    this.initMap()
+    //this.initMap()
+    const el = document.getElementById("top-left")
+    el.style.transform = "translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 100px)) scale(5)"
+    setTimeout(() => {
+      el.style.transition = "filter 0.5s ease-in-out, transform 1.5s ease-in-out, opacity 1.5s ease-in-out"
+      el.style.transform = "translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 100px)) scale(2)"
+      //el.classList.add("centered")
+    }, 500)
+    /*el.addEventListener("transitionstart", (e) => {
+      el.style.opacity = "1"
+    }, {once: true})*/
+    el.addEventListener("transitionend", (e) => {
+      if(e.propertyName === "transform") {
+        el.style.transition = "filter 0.5s ease-in-out, transform 0.5s ease-in-out"
+        console.log(window.getComputedStyle(el, "transform"))
+        el.style.transform = "translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 120px)) scale(2)"
+        el.addEventListener("transitionend", (e) => {
+          if(e.elapsedTime === 0.5) {
+            document.getElementById("page-progress").addEventListener("transitionend", () => {
+              this.initMap()
+            }, {once: true})
+            document.getElementById("page-progress").style.opacity = "1"
+          }
+        }, {once: true})
+      }
+      //console.log(e)
+    }, {once: true})
+    //}, {once: true})
   }
 
   /**
@@ -110,6 +146,12 @@ export class MapComponent implements OnInit {
    * @param {LeafletEvent} e
   **/
   private zoom = (e): void => {
+    /*dispatchEvent(new CustomEvent("notification", {
+      detail: {
+        title: 'click',
+        message: ""
+      }
+    }))*/
     if (this.toolID() === 0) {
       this.map.setView(e.latlng)
       //this.map.zoomIn()
@@ -148,12 +190,31 @@ export class MapComponent implements OnInit {
         }
       ).addTo(this.map)
       this.polyline.on('mousedown', (e) => {
-        if(this.toolID() === 1) {
+        if([1, 6].includes(this.toolID())) {
           this.bool = false
           let i = e.target.getLatLngs().findIndex((x,i,t) => L.GeometryUtil.belongsSegment(e.latlng, t[i], t[i+1]))
+          if(this.toolID() === 1) {
+            this.drag = true
+            this.num = i+1
+          } else {
+            if(this.cut.length === 1 && this.cut[0] > i+1) {
+              this.cut[0] = this.cut[0]+1
+            }
+            this.cut.push(i+1)
+          }
           this.addToIndex(e, i+1)
-          this.drag = true
-          this.num = i+1
+          if(this.cut.length > 1) {
+            setTimeout(() => {
+              this.cut.sort()
+              this.coordinates.splice(this.cut[0]+1, this.cut[1]-this.cut[0]-1)
+              this.elevations.splice(this.cut[0]+1, this.cut[1]-this.cut[0]-1)
+              this.cut = []
+              this.draw()
+              this.saveState()
+              this.updateChart()
+              this.updateInformations()
+            }, 300)
+          }
         }
       })
       /*this.polyline.on('mousemove', (e) => {
@@ -274,6 +335,14 @@ export class MapComponent implements OnInit {
    * @param {LeafletEvent}
   **/
   private move = (e): void => {
+    /*dispatchEvent(new CustomEvent("notification", {
+      detail: {
+        title: "k",
+        message: "jj"
+      }
+    }))*/
+    /*let po = document.getElementById("points")
+        po.textContent = String(parseInt(po.textContent)+1)*/
     if(!this.point || (this.point && this.drag && this.point === this.num)) {
       const lat = document.getElementById("lat") as HTMLButtonElement
       const lng = document.getElementById("lng") as HTMLButtonElement
@@ -293,6 +362,12 @@ export class MapComponent implements OnInit {
     if(this.drag && (this.toolID() === 1 || this.toolID() === 3)) {
       //L.DomUtil.addClass(this.map._container,'grabbing-cursor')
       this.activateTool(3)
+      /*dispatchEvent(new CustomEvent("notification", {
+        detail: {
+          title: "yu",
+          message: this.num
+        }
+      }))*/
       let c = this.coordinates.slice(0)
       c.splice(this.num, 1)
       let near = c.find(coord => {
@@ -361,7 +436,7 @@ export class MapComponent implements OnInit {
       {
         className: "grab-cursor",
         radius: this.map.getZoom() < 16 ? 0 : (this.circles.length === this.point ? 15 : 10),
-        fillColor: '#34616C',
+        fillColor: this.cut.includes(this.circles.length) ? 'red' : '#34616C',
         fillOpacity:1,
         //stroke: false
         stroke: true,
@@ -380,10 +455,19 @@ export class MapComponent implements OnInit {
         this.bool = false
         this.drag = true
         this.num = this.coordinates.findIndex(x => x[0] === (e as L.LeafletMouseEvent).target._latlng.lat && x[1] === (e as L.LeafletMouseEvent).target._latlng.lng)
+        dispatchEvent(new CustomEvent("notification", {
+          detail: {
+            title: "k",
+            message: 'll'
+          }
+        }))
+        //L.DomEvent.stopPropagation
       })
-      /*.on('mousemove', (e) => {
-        this.move(e)
-      })*/
+      .on('mousemove', (e) => {
+        //this.move(e)
+        //console.log("test")
+        //L.DomEvent.stop(e)
+      })
       .on('mouseup', (e) => {
         //console.log('khk')
       })
@@ -405,13 +489,6 @@ export class MapComponent implements OnInit {
           this.delete(e)
         } else if(this.toolID() === 1) {
           L.DomEvent.stop(e)
-          /*if(this.point) {
-            this.point.setRadius(10)
-          }*/
-          /*document.getElementById("lat").textContent = e.target._latlng.lat
-          document.getElementById("lat").style.color = "#34616C"
-          document.getElementById("lng").textContent = e.target._latlng.lng
-          document.getElementById("lng").style.color = "#34616C"*/
           this.circles[this.point] === e.target ? this.unselectMarker() : this.selectMarker(e.target)
         }
       }))
@@ -481,9 +558,11 @@ export class MapComponent implements OnInit {
       this.elevations.splice(idx, 0, ele)
       if(this.point && idx < this.point) this.point++
       this.drawPolyline()
-      this.saveState()
-      this.updateChart()
-      this.updateInformations()
+      if(this.toolID() !== 6) {
+        this.saveState()
+        this.updateChart()
+        this.updateInformations()
+      }
     })
     this.draw()
   }
@@ -548,7 +627,8 @@ export class MapComponent implements OnInit {
       coordinates : x,
       elevations : y,
       center : [this.map.getCenter().lat, this.map.getCenter().lng],
-      zoom : this.map.getZoom()
+      zoom : this.map.getZoom(),
+      metadata : this.metadata
     })
     this.historyIndex++
     if(this.historyIndex !== 0) {
@@ -565,6 +645,7 @@ export class MapComponent implements OnInit {
     this.historyIndex--
     this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
     this.elevations = this.history[this.historyIndex].elevations.slice(0)
+    this.metadata = this.history[this.historyIndex].metadata
     this.map.setView(
       this.history[this.historyIndex].center.slice(0),
       this.history[this.historyIndex].zoom
@@ -572,6 +653,7 @@ export class MapComponent implements OnInit {
     this.draw()
     this.updateChart()
     this.updateInformations()
+    this.fillMeta()
     let redo = (this.redo as HTMLButtonElement)
     if(redo.disabled) {
         redo.disabled = false
@@ -591,6 +673,7 @@ export class MapComponent implements OnInit {
     this.historyIndex++
     this.coordinates = this.history[this.historyIndex].coordinates.slice(0)
     this.elevations = this.history[this.historyIndex].elevations.slice(0)
+    this.metadata = this.history[this.historyIndex].metadata
     this.map.setView(
       this.history[this.historyIndex].center.slice(0),
       this.history[this.historyIndex].zoom
@@ -598,6 +681,7 @@ export class MapComponent implements OnInit {
     this.draw()
     this.updateChart()
     this.updateInformations()
+    this.fillMeta()
     let redo = (this.redo as HTMLButtonElement)
     if(this.historyIndex+1 === this.history.length) {
         redo.disabled = true
@@ -622,10 +706,41 @@ export class MapComponent implements OnInit {
     document.getElementById("max").textContent = this.elevations.length ? String(Math.max(...this.elevations).toFixed(2)) : "-"
     document.getElementById("min").textContent = this.elevations.length ? String(Math.min(...this.elevations).toFixed(2)) : "-"
     if(!this.point) {
-      document.getElementById("moy").textContent = this.elevations.length ? String(this.elevations.reduce((moy, ele) => (moy+ele)/2, this.elevations[0]).toFixed(2)) : "-"
+      document.getElementById("moy").textContent = this.elevations.length ? String((this.elevations.reduce((total, ele) => total+ele)/this.elevations.length).toFixed(2)) : "-"
       document.getElementById("moy").classList.remove("highlight")
       document.getElementById("moy").nextElementSibling.textContent = "Moy"
     }
+  }
+
+  private erase = (e): void => {
+    if((e.target as HTMLInputElement).checked){
+      this.coordinates = []
+      this.elevations = []
+      this.metadata = {}
+      this.draw()
+      this.updateChart()
+      this.updateInformations()
+      this.fillMeta()
+      this.saveState() ;
+      (e.target as HTMLInputElement).checked = false
+    }
+  }
+
+  private fillMeta = (): void => {
+    (document.getElementById("author") as HTMLInputElement).value = this.metadata.hasOwnProperty("author") && this.metadata.author.hasOwnProperty("name") ? this.metadata.author.name : "" ;
+    (document.getElementById("email") as HTMLInputElement).value = this.metadata.hasOwnProperty("author") && this.metadata.author.hasOwnProperty("email") ? this.metadata.author.email : "" ;
+    (document.getElementById("name") as HTMLInputElement).value = this.metadata.hasOwnProperty("name") ? this.metadata.name : "" ;
+    (document.getElementById("desc") as HTMLTextAreaElement).value = this.metadata.hasOwnProperty("desc") ? this.metadata.desc : "" ;
+  }
+
+  private loadCSS = (src): any => {
+    return new Promise((resolve, reject) => {
+      let link = document.createElement("link")
+          link.rel = "stylesheet"
+          link.href = src
+          link.addEventListener("load", (e) => resolve(e))
+      document.head.appendChild(link)
+    })
   }
 
   /**
@@ -634,6 +749,7 @@ export class MapComponent implements OnInit {
   private initMap(): void {
     this.map = L.map('map', {
       center: [ 45.778480529785156, 4.8537468910217285 ],
+      //center: [37.83962631225586, -119.51520538330078],
       zoom: 16,
       zoomControl: false
     }) ;
@@ -648,22 +764,75 @@ export class MapComponent implements OnInit {
     let mapbox = `https://api.mapbox.com/styles/v1/${theme}/tiles/256/{z}/{x}/{y}?access_token=${token}`
     const tiles = L.tileLayer(mapbox, {
       useCache: true,
+      cacheMaxAge: 86400000,
       crossOrigin: true,
       maxZoom: 19,
       detectRetina: true,
       attribution: '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     })
+
+    /*tiles.on('remainingLength', (e) => {
+      console.log('A')
+      console.log(e)
+    })
+
+    tiles.on('queueLength', (e) => {
+      console.log('B')
+      console.log(e)
+    })
+
+    tiles.on('seedstart', (e) => {
+      console.log('C')
+      console.log(e)
+    })*/
+    let length = 0
+    let progress = 0
+    const el = document.getElementById("page-progress").children[0] as HTMLElement
+    const el2 = el.parentElement.parentElement as HTMLElement
+    tiles.on('tileloadstart', (e) => length++ )
+    tiles.on('tileload', (e) => {
+      progress++
+      el.style.width = (progress/length)*100 + "%"
+    })
+    tiles.on('load', (e) => {
+      el.parentElement.addEventListener("transitionend", () => {
+        el2.style.opacity = "0"
+      }, {once: true})
+      el2.addEventListener("transitionend", (e) => {
+        if((e.target as HTMLElement).id === "loader") {
+          el2.remove()
+        }
+      })
+      setTimeout(() => {
+        Promise.all([
+          this.loadCSS("/cookieconsent/cookieconsent.min.css"),
+          this.loadCSS("/leaflet.css")
+        ]).then(x => {
+          //console.log(x)
+          el.parentElement.style.opacity = "0"
+          el.parentElement.addEventListener("transitionend", () => {
+            document.getElementById("top-left").addEventListener("transitionend", () => {
+              (document.querySelector("#top-left span > span") as HTMLElement).style.marginRight = "15px" ;
+              document.getElementById("info").style.display = "block"
+              document.getElementById("info").style.opacity = ""
+            }, {once: true})
+            document.getElementById("top-left").style.transform = ""
+          }, {once: true})
+        })
+      }, 500);
+    })
+
     tiles.addTo(this.map)
 
     /*tiles.on('tilecachehit', (e) => {
       console.log(e.url)
-    })
+    })*/
 
-    tiles.on('tilecachemiss', (e) => {
+    /*tiles.on('tilecachemiss', (e) => {
       console.log(e.url)
-    })
+    })*/
 
-    tiles.on('tilecacheerror', (e) => {
+    /*tiles.on('tilecacheerror', (e) => {
       console.log(e)
     })*/
 
@@ -675,18 +844,21 @@ export class MapComponent implements OnInit {
     this.map.on('mousedown', this.add)
     this.map.on('mousemove', this.move)
     this.map.on('mousemove', this.select)
+    this.map.on('touchmove', (e) => e.preventDefault())
     this.map.on('mouseup', () => {
       if(this.toAdd) {
         //this.addShortcut()
+        this.toAdd.sort().reverse()
+        //console.log(this.toAdd)
         this.toAdd.forEach(idx => {
           //console.log('remove',idx)
           this.coordinates.splice(idx, 1)
           this.elevations.splice(idx, 1)
-          this.saveState()
-          this.updateChart()
-          this.updateInformations()
-          this.draw()
         })
+        this.saveState()
+        this.updateChart()
+        this.updateInformations()
+        this.draw()
         this.map.removeLayer(this.lasso)
         this.lasso = null
         this.toAdd = null
@@ -751,6 +923,141 @@ export class MapComponent implements OnInit {
     this.undo.addEventListener('click', this.prev)
     this.redo.addEventListener('click', this.next)
 
+    document.getElementById("erase").addEventListener("change", this.erase)
+
+    window.addEventListener("metadata", () => {
+      document.getElementById("info").dispatchEvent(new Event("click"))
+    })
+
+    document.getElementById("info").addEventListener("click", () => {
+      document.body.classList.add("blur")
+      document.getElementById("metadata-container").style.zIndex = "10000"
+      Array.from(document.getElementById("metadata").children).forEach((el, i) => {
+        setTimeout(() => {
+          (el as HTMLElement).style.opacity = "1" ;
+          (el as HTMLElement).style.transform = "translateY(0px)"
+        }, i*100)
+      })
+    })
+
+    document.getElementById("metadata").addEventListener("click", (e) => e.stopPropagation())
+
+    document.getElementById("valid_metadata").addEventListener("click", () => {
+      document.getElementById("metadata-container").dispatchEvent(new Event("click"))
+    })
+
+    document.getElementById("metadata-container").addEventListener("click", () => {
+      Array.from(document.getElementById("metadata").children).reverse().forEach((el, i, array) => {
+        if(el instanceof HTMLLabelElement) {
+          const x = el.children[1] as HTMLInputElement
+          if(["author", "email"].includes(x.id)) {
+            if(!this.metadata.hasOwnProperty("author")) this.metadata.author = {}
+            this.metadata["author"][x.id === "author" ? "name" : x.id] = x.value
+          } else {
+            this.metadata[x.id] = x.value
+          }
+        }
+        if(i+1 === array.length) {
+          el.addEventListener("transitionend", () => {
+            if((document.querySelector("export-module") as HTMLElement).style.display !== "flex") {
+              document.body.classList.remove("blur")
+            } else {
+              dispatchEvent(new CustomEvent("init_file"))
+            }
+            document.getElementById("metadata-container").style.zIndex = "-1"
+          }, {once: true})
+        }
+        setTimeout(() => {
+          (el as HTMLElement).style.opacity = "0" ;
+          (el as HTMLElement).style.transform = "translateY(40px)"
+        }, i*100)
+      })
+      //console.log(this.metadata)
+    })
+
+    Array.from(document.querySelectorAll("#lasso, #wand, #cut")).forEach(input => {
+      input.addEventListener("change", (e) => {
+        if((e.target as HTMLInputElement).checked && this.coordinates.length < 3) {
+          (e.target as HTMLInputElement).checked = false
+          dispatchEvent(new CustomEvent("notification", {
+            detail: {
+              title: "Erreur",
+              message: "Placer au moins trois points sur la carte."
+            }
+          }))
+        }
+      })
+    })
+
+    Array.from(document.querySelectorAll("input[name='tools']")).forEach(input => {
+      input.addEventListener("change", () => {
+        if(this.toolID() !== 6 && this.cut.length > 0) {
+          this.coordinates.splice(this.cut[0], 1)
+          this.elevations.splice(this.cut[0], 1)
+          this.cut = []
+          this.draw()
+        }
+      })
+    })
+
+    document.getElementById("help-flex").addEventListener("click", (e) => {
+      e.stopPropagation()
+    })
+
+    document.getElementById("help").addEventListener("click", () => {
+      document.body.classList.add("blur") ;
+      document.getElementById("help_container").style.zIndex = "10000"
+      document.body.addEventListener("transitionend", () => {
+        document.getElementById("gif").style.opacity = "1"
+        Array.from(document.querySelectorAll("input[name='help'] + label")).forEach((label, i) => {
+          setTimeout(() => {
+            (label as HTMLElement).style.opacity = "1" ;
+            (label as HTMLElement).style.transform = "translateY(0px)" ;
+          }, i * 100) ;
+        })
+      }, {once: true})
+    }) ;
+
+    document.getElementById("help_container").addEventListener("click", () => {
+      const gif = document.getElementById("gif") as HTMLImageElement
+      gif.style.opacity = "0"
+      if(gif.src = "") {
+        gif.src = "/img/move_map.gif"
+      }
+      Array.from(document.querySelectorAll("input[name='help'] + label")).reverse().forEach((label, i, array) => {
+        if(i+1 === array.length) {
+          label.addEventListener("transitionend", () => {
+            document.body.addEventListener("transitionend", () => {
+              document.getElementById("help_container").style.zIndex = "-1"
+            }, {once: true})
+            document.body.classList.remove("blur")
+          }, {once: true})
+        }
+        setTimeout(() => {
+          (label as HTMLElement).style.opacity = "0" ;
+          (label as HTMLElement).style.transform = "translateY(70px)" ;
+        }, i * 100) ;
+      })
+    })
+
+    document.getElementById("gif").addEventListener("click", (e) => {
+      const gif = e.target as HTMLElement
+            gif.classList.toggle("centered")
+      document.getElementById("help_container").classList.toggle("blur")
+    })
+
+    Array.from(document.querySelectorAll("input[name='help']")).forEach(input => {
+      input.addEventListener("change", (e) => {
+        if((e.target as HTMLInputElement).checked) {
+          (document.getElementById("gif") as HTMLImageElement).src = "/img/" + (input as HTMLInputElement).id.substring(5) + ".gif"
+        }
+      })
+    })
+
+    Array.from(document.querySelectorAll("input[name='help'] + label")).forEach(label => {
+      (label as HTMLElement).style.setProperty("--height", ((label.children[1] as HTMLElement).offsetHeight+40+10) + "px")
+    })
+
     Array.from(document.querySelectorAll(".tooltip")).forEach(tooltip => {
       tooltip.addEventListener("mouseenter", (e) => {
         tooltip.parentElement.dispatchEvent(new Event("mouseleave"))
@@ -763,6 +1070,9 @@ export class MapComponent implements OnInit {
     Array.from(document.querySelectorAll(".tool")).forEach(tool => {
       tool.addEventListener("mouseenter", (e) => {
         if(!(tool.previousElementSibling as HTMLInputElement).disabled) (tool.children[0] as HTMLElement).classList.add("hover")
+        setTimeout(() => {
+          tool.dispatchEvent(new Event("mouseleave"))
+        }, 1000)
       })
       tool.addEventListener("mouseleave", (e) => {
         (tool.children[0] as HTMLElement).classList.remove("hover")
@@ -771,7 +1081,7 @@ export class MapComponent implements OnInit {
 
     Array.from(document.querySelectorAll("#lat, #lng")).forEach(button => {
       button.addEventListener("click", (e) => {
-        console.log((e.target as HTMLButtonElement).value)
+        //console.log((e.target as HTMLButtonElement).value)
         const el = document.createElement("textarea")
               el.value = String((e.target as HTMLButtonElement).value)
               el.setAttribute("readonly", "")
@@ -824,7 +1134,8 @@ export class MapComponent implements OnInit {
       dispatchEvent(new CustomEvent("data", {
         detail: {
           coordinates: this.coordinates,
-          elevations: this.elevations
+          elevations: this.elevations,
+          metadata: this.metadata
         }
       }))
     })
@@ -842,19 +1153,27 @@ export class MapComponent implements OnInit {
         navigator.geolocation.getCurrentPosition(position => {
           this.map.setView([position.coords.latitude, position.coords.longitude])
           this.saveState()
+        }, error => {
+          dispatchEvent(new CustomEvent("notification", {
+            detail: {
+              title: "Erreur",
+              message: "La connexion n'est pas sécurisée."
+            }
+          }))
         })
       } else {
 
       }
     })
 
-    document.getElementById("hide_details").addEventListener("change", (e) => {
+    /*document.getElementById("hide_details").addEventListener("change", (e) => {
       console.log(e)
-    })
+    })*/
 
     document.getElementById("wand").addEventListener("click", () => {
+      if(this.coordinates.length < 3) return
       document.body.classList.toggle("wand_mode")
-      Array.from(document.querySelectorAll("input[name='tools']:not(:last-of-type)")).forEach(input => {
+      Array.from(document.querySelectorAll("input[name='tools']:not(:nth-of-type(6))")).forEach(input => {
         (input as HTMLInputElement).disabled = !(input as HTMLInputElement).disabled
       })
       if(document.body.classList.contains("wand_mode")) {
@@ -885,6 +1204,12 @@ export class MapComponent implements OnInit {
         //let total = distances.reduce((total, x) => total+x, 0)
         //let min = Math.min(...distances)
         //let max = Math.max(...distances)
+        let div = document.createElement("div")
+            div.id = "tolerance-container"
+        let div1 = document.createElement("div")
+        let span1 = document.createElement("span")
+            span1.textContent = this.coordinates.length
+        div1.appendChild(span1)
         let range = document.createElement("input")
             range.type = "range"
             range.name = "tolerance"
@@ -910,18 +1235,54 @@ export class MapComponent implements OnInit {
               this.elevations = new_coordinates.elevations
               this.draw()
             })
-        document.body.appendChild(range)
+        div1.appendChild(range)
+        let span2 = document.createElement("span")
+            span2.textContent = "2"
+        div1.appendChild(span2)
+        div.appendChild(div1)
+        /*let div1 = document.createElement("div")
+        let span1 = document.createElement("span")
+            span1.textContent = this.coordinates.length
+        let span2 = document.createElement("span")
+            span2.textContent = this.coordinates.length
+        div1.appendChild(span1)
+        div1.appendChild(span2)
+        div.appendChild(div1)*/
+        let div2 = document.createElement("div")
+        let cancel = document.createElement("button")
+            cancel.id = "cancel"
+            cancel.name = "cancel"
+            cancel.textContent = "Annuler"
+            cancel.addEventListener("click", () => {
+              this.coordinates = save
+              this.elevations = saveE
+              document.getElementById("wand").dispatchEvent(new Event("click"))
+            })
+        let validation = document.createElement("button")
+            validation.id = "validation"
+            validation.name = "validation"
+            validation.textContent = "Valider"
+            validation.addEventListener("click", () => {
+              document.getElementById("wand").dispatchEvent(new Event("click"))
+            })
+        div2.appendChild(cancel)
+        div2.appendChild(validation)
+        div.appendChild(div2)
+        document.body.appendChild(div)
       } else {
-        document.getElementById("tolerance").remove()
+        document.getElementById("tolerance-container").remove()
         this.saveState()
         this.updateChart()
         this.updateInformations()
+        this.draw()
       }
     })
 
     window.addEventListener("new", (e) => {
       this.coordinates = (e as any).detail.coordinates
       this.elevations = (e as any).detail.elevations
+      this.metadata = (e as any).detail.informations
+      this.fillMeta()
       this.draw()
       this.map.fitBounds(this.polyline.getBounds())
       this.updateChart()

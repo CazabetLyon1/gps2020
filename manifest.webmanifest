@@ -1,0 +1,17 @@
+{
+  "short_name": "Lifprojet GPS",
+  "name": "Lifprojet GPS",
+  "description": "Plateforme de visualisation et d'édition d'itinéraires GPS.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "/img/map.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    }
+  ]
+}

@@ -99,6 +99,24 @@ export class ImportComponent implements OnInit {
       this.module.querySelector("#import_container").appendChild(a)
       let coordinates = []
       let elevations = []
+      let informations = {}
+      Array.from(doc.querySelector("metadata").children).forEach(tag => {
+        let tagName = (tag as HTMLElement).tagName
+        if(["name", "desc"].includes(tagName)) {
+          informations[tagName] = (tag as HTMLElement).textContent
+        } else if(tagName === "author") {
+          let author = {}
+          Array.from((tag as HTMLElement).children).forEach(subtag => {
+            let subtagName = (subtag as HTMLElement).tagName
+            if(["name"].includes(subtagName)) {
+              author[subtagName] = (subtag as HTMLElement).textContent
+            } else if(subtagName === "email") {
+              author[subtagName] = (subtag as HTMLElement).id + "@" + (subtag as HTMLElement).getAttribute("domain")
+            }
+          })
+          informations["author"] = author
+        }
+      })
       let points = Array.from(doc.querySelector("trkseg").children)
       points.forEach((point, i) => {
         setTimeout(() => {
@@ -112,7 +130,8 @@ export class ImportComponent implements OnInit {
               dispatchEvent(new CustomEvent("new", {
                 detail: {
                   coordinates: coordinates,
-                  elevations: elevations
+                  elevations: elevations,
+                  informations: informations
                 }
               }))
             }, {once: true})
