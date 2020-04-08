@@ -132,7 +132,7 @@ module.exports = {
       {}
     ),*/
   ],
-  optimization: {
+  /*optimization: {
     minimize: true
-  }
+  }*/
 }
