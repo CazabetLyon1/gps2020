@@ -9,21 +9,21 @@
 <div id="map_tools">
   <button type="button" id="help" name="help" aria-label="help"></button>
   <input type="radio" id="move_map" name="tools" checked>
-  <label class="tool" for="move_map"><span class="tooltip">Déplacer</span></label>
+  <label class="tool" for="move_map" data-tooltip="Déplacer"></label>
   <input type="radio" id="add" name="tools">
-  <label class="tool" for="add"><span class="tooltip">Ajouter</span></label>
+  <label class="tool" for="add" data-tooltip="Ajouter"></label>
   <input type="radio" id="delete" name="tools">
-  <label class="tool" for="delete"><span class="tooltip">Supprimer</span></label>
+  <label class="tool" for="delete" data-tooltip="Supprimer"></label>
   <input type="radio" id="move" name="tools">
-  <label class="tool" for="move"><span class="tooltip">Déplacer</span></label>
+  <label class="tool" for="move" data-tooltip="Déplacer"></label>
   <input type="radio" id="lasso" name="tools">
-  <label class="tool" for="lasso"><span class="tooltip">Lasso</span></label>
+  <label class="tool" for="lasso" data-tooltip="Lasso"></label>
   <input type="radio" id="wand" name="tools">
-  <label class="tool" for="wand"><span class="tooltip">Correcteur</span></label>
+  <label class="tool" for="wand" data-tooltip="Correcteur"></label>
   <input type="radio" id="cut" name="tools">
-  <label class="tool" for="cut"><span class="tooltip">Raccourci</span></label>
+  <label class="tool" for="cut" data-tooltip="Raccourci"></label>
   <input type="radio" id="erase" name="tools">
-  <label class="tool" for="erase"><span class="tooltip">Effacer</span></label>
+  <label class="tool" for="erase" data-tooltip="Effacer"></label>
 </div>
 <div id="top-left">
   <img src="/img/map.png" alt="Logo Lifprojet">
@@ -34,7 +34,7 @@
   <button type="button" name="undo" id="undo" aria-label="undo" disabled></button>
   <!--<button type="button" name="zoomin" id="zoomin"></button>-->
   <!--<span id="lat"></span><span id="lng"></span>-->
-  <button type="button" name="localization" id="localization" aria-label="localize"></button>
+  <button type="button" name="localization" id="localization" aria-label="localize" data-tooltip="Localiser"></button>
   <!--<button type="button" name="compass" id="compass"></button>-->
   <!--<button type="button" name="zoomout" id="zoomout"></button>-->
   <button type="button" name="redo" id="redo" aria-label="redo" disabled></button>

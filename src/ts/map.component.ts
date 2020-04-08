@@ -63,6 +63,7 @@ export class MapComponent implements OnInit {
 
   ngOnInit(): void {
     //this.initMap()
+    window.addEventListener("scroll", this.disableScroll)
     const el = document.getElementById("top-left")
     el.style.transform = "translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 100px)) scale(5)"
     setTimeout(() => {
@@ -76,7 +77,8 @@ export class MapComponent implements OnInit {
     el.addEventListener("transitionend", (e) => {
       if(e.propertyName === "transform") {
         el.style.transition = "filter 0.5s ease-in-out, transform 0.5s ease-in-out"
-        console.log(window.getComputedStyle(el, "transform"))
+        /*console.log(window.getComputedStyle(el).transform)*/
+        window.getComputedStyle(el).transform
         el.style.transform = "translate(calc(50vw - 50% - 40px), calc(50vh - 50% - 120px)) scale(2)"
         el.addEventListener("transitionend", (e) => {
           if(e.elapsedTime === 0.5) {
@@ -90,6 +92,10 @@ export class MapComponent implements OnInit {
       //console.log(e)
     }, {once: true})
     //}, {once: true})
+  }
+
+  private disableScroll = (): void => {
+    window.scrollTo(0, 0)
   }
 
   /**
@@ -455,12 +461,12 @@ export class MapComponent implements OnInit {
         this.bool = false
         this.drag = true
         this.num = this.coordinates.findIndex(x => x[0] === (e as L.LeafletMouseEvent).target._latlng.lat && x[1] === (e as L.LeafletMouseEvent).target._latlng.lng)
-        dispatchEvent(new CustomEvent("notification", {
+        /*dispatchEvent(new CustomEvent("notification", {
           detail: {
             title: "k",
             message: 'll'
           }
-        }))
+        }))*/
         //L.DomEvent.stopPropagation
       })
       .on('mousemove', (e) => {
@@ -815,6 +821,7 @@ export class MapComponent implements OnInit {
               (document.querySelector("#top-left span > span") as HTMLElement).style.marginRight = "15px" ;
               document.getElementById("info").style.display = "block"
               document.getElementById("info").style.opacity = ""
+              window.removeEventListener("scroll", this.disableScroll)
             }, {once: true})
             document.getElementById("top-left").style.transform = ""
           }, {once: true})
@@ -1067,15 +1074,44 @@ export class MapComponent implements OnInit {
       }, true)*/
     })
 
-    Array.from(document.querySelectorAll(".tool")).forEach(tool => {
+    /*Array.from(document.querySelectorAll(".tool, #localization")).forEach(tool => {
       tool.addEventListener("mouseenter", (e) => {
-        if(!(tool.previousElementSibling as HTMLInputElement).disabled) (tool.children[0] as HTMLElement).classList.add("hover")
-        setTimeout(() => {
-          tool.dispatchEvent(new Event("mouseleave"))
-        }, 1000)
+        console.log(e)
+        console.log((e as any).layerX, (e as any).layerY)
+        if((e as any).offsetX < -4 || (e as any).offsetX > 45 || (e as any).offsetY < -4 || (e as any).offsetY > 45) {
+          e.preventDefault()
+          return
+        }
+        if(tool.previousElementSibling instanceof HTMLButtonElement || !(tool.previousElementSibling as HTMLInputElement).disabled) {
+          (tool as HTMLElement).classList.add("hover") ;
+          (tool.children[0] as HTMLElement).classList.add("hover") ;
+          setTimeout(() => {
+            tool.dispatchEvent(new Event("mouseleave"))
+          }, 1000)
+        }
       })
       tool.addEventListener("mouseleave", (e) => {
-        (tool.children[0] as HTMLElement).classList.remove("hover")
+        (tool as HTMLElement).classList.remove("hover") ;
+        (tool.children[0] as HTMLElement).classList.remove("hover") ;
+      })
+    })*/
+
+    Array.from(document.querySelectorAll("[data-tooltip]")).forEach(el => {
+      el.addEventListener("mouseenter", () => {
+        let span = document.createElement("span")
+            span.className = "tooltip"
+            span.textContent = el.getAttribute("data-tooltip")
+            el.appendChild(span)
+            span.classList.add("hover")
+            setTimeout(() => {
+              el.dispatchEvent(new Event("mouseleave"))
+            }, 1000)
+      })
+      el.addEventListener("mouseleave", () => {
+        if(el.firstElementChild) {
+          //el.classList.remove("hover")
+          el.firstElementChild.remove()
+        }
       })
     })
 
