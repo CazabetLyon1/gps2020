@@ -823,7 +823,7 @@ export class MapComponent implements OnInit {
               document.getElementById("info").style.opacity = ""
               window.removeEventListener("scroll", this.disableScroll)
             }, {once: true})
-            document.getElementById("top-left").style.transform = ""
+            document.getElementById("top-left").style.transform = window.innerWidth < 800 ? "translate(-20px,-20px)" : ""
           }, {once: true})
         })
       }, 500);
