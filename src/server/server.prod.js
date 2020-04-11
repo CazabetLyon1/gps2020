@@ -4,11 +4,14 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import mysql from 'mysql2'
 import compression from 'compression'
+import nodemailer from 'nodemailer'
+import multer from 'multer'
 
 const PORT = process.env.PORT || 8080
 const HOST = "lif.sci-web.net"
 const app = express()
 const jsonParser = bodyParser.json()
+const upload = multer()
 
 app.use(compression())
 
@@ -23,6 +26,8 @@ app.get('/', (req, res) => {
   let file = fs.readdirSync(__dirname).find(file => file.match(new RegExp('index.(.*?).html')))
   file ? res.sendFile(file, {root: __dirname}) : res.send("error")
 })
+
+require('./mail.js')(app, upload, nodemailer)
 
 app.listen(PORT, HOST, () => {
     console.log(`App listening to http://${HOST}:${PORT}....`)

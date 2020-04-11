@@ -199,3 +199,39 @@ export-module {
   line-height: 20px;
   color: rgb(170,170,170);
 }
+
+#export_container .file-link button {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  margin: auto 60px auto auto;
+  cursor: pointer;
+}
+
+#export_container .file-link button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  background-color: #2B2B2B;
+  mask-image: url("/img/envelope.png");
+  -webkit-mask-image: url("/img/envelope.png");
+  mask-size: 20px;
+  -webkit-mask-size: 20px;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+#export_container .file-link button:hover::before {
+  background-color: #008cd0;
+}
+
+#export_container .file-link.hover::before {
+  background-color: #2B2B2B !important;
+}
