@@ -68,6 +68,10 @@ export class ExportComponent implements OnInit {
         b.style.width = "100%"
       }, 300)
       let data = (e as any).detail
+      let email = ""
+      if(data.metadata.hasOwnProperty("author") && data.metadata.author.hasOwnProperty("email") && data.metadata.author.email !== "") {
+        email = data.metadata.author.email
+      }
       if(!bool) delete data["metadata"]
       let s = this.generateFile(data)
       let blob = new Blob([s], {type: "application/xml"})
@@ -85,8 +89,28 @@ export class ExportComponent implements OnInit {
           span22.textContent = "Fichier GPX"
       span2.appendChild(span21)
       span2.appendChild(span22)
+      let mail = document.createElement("button")
+          mail.id = "sendMail"
+          //mail.disabled = !(bool && data.metadata.hasOwnProperty("author") && data.metadata.author.hasOwnProperty("email") && data.metadata.author.email !== "")
+          mail.addEventListener("mouseenter", () => mail.parentElement.classList.add("hover"))
+          mail.addEventListener("mouseleave", () => mail.parentElement.classList.remove("hover"))
+          mail.addEventListener("click", (e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            if(email !== "") {
+              this.sendMail(email, blob).then(data => {
+                this.sendNotification("Succès", "Le mail a été envoyé.")
+              }).catch(error => {
+                this.sendNotification("Erreur", "Une erreur s'est produite.")
+              })
+            } else {
+              this.sendNotification("Erreur", "Aucun email dans les métadonnées.")
+            }
+            return false
+          })
       l.appendChild(span1)
       l.appendChild(span2)
+      l.appendChild(mail)
       this.module.querySelector("#export_container").appendChild(l)
       b.addEventListener("transitionend", () => {
         a.remove()
@@ -96,6 +120,34 @@ export class ExportComponent implements OnInit {
       //window.URL.revokeObjectURL(url)
     }, {once: true})
     dispatchEvent(new CustomEvent("need_data"))
+  }
+
+  private sendNotification = (title, message): void => {
+    dispatchEvent(new CustomEvent("notification", {
+      detail: {
+        title: title,
+        message: message
+      }
+    }))
+  }
+
+  private sendMail = (dest, blob): any => {
+    return new Promise((resolve, reject) => {
+      let xhr = new XMLHttpRequest()
+      xhr.open("POST", "/mail", true)
+      xhr.responseType = "json"
+      xhr.onload = (data) => {
+        if(xhr.readyState === xhr.DONE && xhr.status === 200) {
+          resolve(data)
+        } else {
+          reject("error")
+        }
+      }
+      let fd = new FormData()
+          fd.append('file', blob, 'file.gpx')
+          fd.append('dest', dest)
+      xhr.send(fd)
+    })
   }
 
   private generateFile = (data): string => {

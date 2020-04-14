@@ -4,6 +4,13 @@
     <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>-->
     <!--<link rel="stylesheet" href="https://unpkg.com/mapbox-gl@1.7.0/dist/mapbox-gl.css"/>-->
     <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
       #loader {
         z-index: 10005;
         position: absolute;
@@ -42,7 +49,7 @@
     <meta name="author" content="Guyonnet Amaury">
     <meta name="description" content="Plateforme de visualisation et d'édition d'itinéraires GPS.">
     <meta name="keywords" content="trace,GPS,GPX,itinéraire">
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, shrink-to-fit=no'>
+    <meta name='viewport' content='width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, shrink-to-fit=no'>
     <meta name="theme-color" content="#FFFFFF">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
