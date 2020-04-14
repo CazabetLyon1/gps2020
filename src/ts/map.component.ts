@@ -844,7 +844,7 @@ export class MapComponent implements OnInit {
     this.map.on('click', this.zoom)
     this.map.on('mousedown', this.add)
     this.map.on('mousemove', this.move)
-    //this.map.on('mousemove', this.select)
+    this.map.on('mousemove', this.select)
     this.map.on('touchmove', (e) => e.preventDefault())
     this.map.on('mouseup', () => {
       if(this.toAdd) {

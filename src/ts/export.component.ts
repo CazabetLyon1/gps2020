@@ -179,7 +179,7 @@ export class ExportComponent implements OnInit {
           if(parts.length > 1) {
             email.id = parts[0]
             email.setAttribute("domain", parts[1])
-            metadata.appendChild(email)
+            author.appendChild(email)
           }
         }
         if(author.children.length !== 0) metadata.appendChild(author)
