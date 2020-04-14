@@ -368,12 +368,6 @@ export class MapComponent implements OnInit {
     if(this.drag && (this.toolID() === 1 || this.toolID() === 3)) {
       //L.DomUtil.addClass(this.map._container,'grabbing-cursor')
       this.activateTool(3)
-      /*dispatchEvent(new CustomEvent("notification", {
-        detail: {
-          title: "yu",
-          message: this.num
-        }
-      }))*/
       let c = this.coordinates.slice(0)
       c.splice(this.num, 1)
       let near = c.find(coord => {
@@ -850,7 +844,7 @@ export class MapComponent implements OnInit {
     this.map.on('click', this.zoom)
     this.map.on('mousedown', this.add)
     this.map.on('mousemove', this.move)
-    this.map.on('mousemove', this.select)
+    //this.map.on('mousemove', this.select)
     this.map.on('touchmove', (e) => e.preventDefault())
     this.map.on('mouseup', () => {
       if(this.toAdd) {
@@ -1012,6 +1006,10 @@ export class MapComponent implements OnInit {
     })
 
     document.getElementById("help").addEventListener("click", () => {
+      const gif = document.getElementById("gif") as HTMLImageElement
+      if(gif.getAttribute("src") === "") {
+        gif.src = "/img/move_map.gif"
+      }
       document.body.classList.add("blur") ;
       document.getElementById("help_container").style.zIndex = "10000"
       document.body.addEventListener("transitionend", () => {
@@ -1028,9 +1026,6 @@ export class MapComponent implements OnInit {
     document.getElementById("help_container").addEventListener("click", () => {
       const gif = document.getElementById("gif") as HTMLImageElement
       gif.style.opacity = "0"
-      if(gif.src = "") {
-        gif.src = "/img/move_map.gif"
-      }
       Array.from(document.querySelectorAll("input[name='help'] + label")).reverse().forEach((label, i, array) => {
         if(i+1 === array.length) {
           label.addEventListener("transitionend", () => {
